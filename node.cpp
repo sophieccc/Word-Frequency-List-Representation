@@ -1,21 +1,22 @@
 #include <iostream>
 #include <string>
+#include <tuple>
 #include "node.h"
 
-Node *Node::addLetter(char letter, int freq)
+std::tuple<Node*, int, int> Node::addLetter(char letter, int freq)
 {
     for (int i = 0; i < branches.size(); i++)
     {
         if (branches[i].letter == letter)
         {
             branches[i].freq += freq;
-            return branches[i].node;
+            return std::make_tuple(branches[i].node,0,0);
         }
     }
     Node *newNode = new Node();
     Branch *newBranch = new Branch(letter, freq, newNode);
     branches.push_back(*newBranch);
-    return newNode;
+    return std::make_tuple(newNode,1,1);
 }
 
 void Node::printNode(int offset)

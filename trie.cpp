@@ -5,25 +5,32 @@
 
 #include "trie.h"
 #include "node.h"
+#include <tuple>
 
 void Trie::addLexicon(std::ifstream &file)
 {
     std::string line;
-    while (getline(file, line))
+    int lineCount = 0;
+    while (getline(file, line) && lineCount<100000)
     {
+        lineCount++;
         int split = line.find(" ");
         std::string word = line.substr(0, split);
         int freq = stoi(line.substr(split));
         addWord(word, freq);
     }
-    rootNode->printNode(0);
+    // rootNode->printNode(0);
 }
 void Trie::addWord(std::string word, int freq)
 {
     Node *current = rootNode;
+    std::tuple <Node*, int, int> results;
     for (int i = 0; i < word.length(); i++)
     {
-        current = current->addLetter(word[i], freq);
+        results = current->addLetter(word[i], freq);
+        current = std::get<0>(results);
+        branchCount += std::get<1>(results);
+        nodeCount += std::get<2>(results);
     }
 }
 
@@ -38,6 +45,16 @@ bool Trie::doesWordExist(std::string word)
     {
         return false;
     }
+}
+
+int Trie::getBranchCount()
+{
+    return branchCount;
+}
+
+int Trie::getNodeCount()
+{
+    return nodeCount;
 }
 
 std::vector<std::string> Trie::getLexicon()
@@ -61,6 +78,8 @@ Trie::Trie()
     cout << "Calling <Trie> constructor" << endl;
 #endif
     rootNode = new Node();
+    branchCount = 0;
+    nodeCount = 1;
 }
 
 Trie::~Trie()
@@ -77,9 +96,11 @@ int main(int argc, char *argv[])
     file.open(argv[1], std::ios_base::in);
     Trie trie = Trie();
     trie.addLexicon(file);
-    std::cout << trie.doesWordExist("hello") << std::endl;
-    std::cout << trie.doesWordExist("e") << std::endl;
-    std::cout << trie.doesWordExist("ho") << std::endl;
-    std::cout << trie.doesWordExist("h") << std::endl;
-    std::cout << trie.doesWordExist("hellooooo") << std::endl;
+    std::cout << trie.getBranchCount() << std::endl;
+    std::cout << trie.getNodeCount() << std::endl;
+    // std::cout << trie.doesWordExist("hello") << std::endl;
+    // std::cout << trie.doesWordExist("e") << std::endl;
+    // std::cout << trie.doesWordExist("ho") << std::endl;
+    // std::cout << trie.doesWordExist("h") << std::endl;
+    // std::cout << trie.doesWordExist("hellooooo") << std::endl;
 }

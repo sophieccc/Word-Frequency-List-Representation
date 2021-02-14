@@ -3,3 +3,5 @@
 cs_full.txt
 en_full.txt
 de_full.txt
+.vscode/settings.json
+*.txt

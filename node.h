@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 
 class Node
 {
@@ -23,7 +24,7 @@ class Node
 
 public:
     void printNode(int offset);
-    Node *addLetter(char letter, int freq);
+    std::tuple<Node*, int, int> addLetter(char letter, int freq);
     Node *contains(std::string word);
     Node *hasLetter(char letter);
     std::vector<Branch> getBranches();

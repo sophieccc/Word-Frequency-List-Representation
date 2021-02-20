@@ -17,14 +17,16 @@ void Trie::addLexicon(std::ifstream &file)
         int split = line.find(" ");
         std::string word = line.substr(0, split);
         int freq = stoi(line.substr(split));
-        addWord(word, freq);
+        processWord(word, freq);
     }
     rootNode->printNode(0);
 }
-void Trie::addWord(std::string word, int freq)
+void Trie::addSuffix(std::string word, int freq, Node*current=NULL)
 {
-    Node *current = rootNode;
-    std::tuple <Node*, int, int> results;
+    if (current == NULL) {
+        current = rootNode;
+    }
+    std::tuple <Node*, int,int> results;
     bool terminal = false;
     for (int i = 0; i < word.length(); i++)
     {
@@ -35,8 +37,36 @@ void Trie::addWord(std::string word, int freq)
         current = std::get<0>(results);
         branchCount += std::get<1>(results);
         nodeCount += std::get<2>(results);
+        allNodes.push_back(current);
     }
 }
+
+void Trie::processWord(std::string word, int freq)
+{
+    int lastIndex = getCommonPrefix(word, lastWord);
+    std::string prefix = word.substr(0,lastIndex);
+    std::string suffix = word.substr(lastIndex);
+    Node* lastPrefixState = rootNode->contains(prefix);
+    if(lastPrefixState->branches.size()!=0) {
+        replace_or_register(lastPrefixState);
+    }
+    addWord(suffix, freq, lastPrefixState);
+}
+
+void Trie::replace_or_register(Node* curr) 
+{
+}
+int Trie::getCommonPrefix(std::string current, std::string previous) 
+{
+    int i;
+    for(i=0; i < previous.length(); i++) {
+        if(previous[i] != current[i]) {
+            return i;
+        }
+    }
+    return i;
+}
+
 
 bool Trie::doesWordExist(std::string word)
 {
@@ -82,8 +112,10 @@ Trie::Trie()
     cout << "Calling <Trie> constructor" << endl;
 #endif
     rootNode = new Node(false, 0);
+    allNodes.push_back(rootNode);
     branchCount = 0;
     nodeCount = 1;
+    lastWord = "";
 }
 
 Trie::~Trie()

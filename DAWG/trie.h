@@ -2,6 +2,7 @@
 #define TRIE_H
 
 #include <string>
+#include <vector>
 #include "node.h"
 
 class Trie
@@ -9,7 +10,10 @@ class Trie
 
 public:
     void addLexicon(std::ifstream &file);
-    void addWord(std::string word, int freq);
+    void addSuffix(std::string word, int freq, Node* current);
+    void processWord(std::string word, int freq);
+    int getCommonPrefix(std::string current, std::string previous);
+    void replace_or_register(Node* curr);
     bool doesWordExist(std::string word);
     int getNodeCount();
     int getBranchCount();
@@ -23,6 +27,8 @@ public:
 
 protected:
     Node *rootNode;
+    std::vector<Node*> allNodes;
+    std::string lastWord;
 };
 
 #endif // TRIE_H

@@ -22,6 +22,7 @@ public:
     bool terminal;
     int frequency;
     std::map<char, Node*> branches;
+    bool registered;
 };
 
 #endif // NODE_H

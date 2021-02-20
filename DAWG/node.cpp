@@ -89,6 +89,7 @@ Node::Node(bool terminality, int freq)
 {
     terminal = terminality;
     frequency = freq;
+    registered = false;
 #ifdef MAP
     cout << "Calling <Node> constructor" << endl;
 #endif

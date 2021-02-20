@@ -19,15 +19,19 @@ void Trie::addLexicon(std::ifstream &file)
         int freq = stoi(line.substr(split));
         addWord(word, freq);
     }
-    // rootNode->printNode(0);
+    rootNode->printNode(0);
 }
 void Trie::addWord(std::string word, int freq)
 {
     Node *current = rootNode;
     std::tuple <Node*, int, int> results;
+    bool terminal = false;
     for (int i = 0; i < word.length(); i++)
     {
-        results = current->addLetter(word[i], freq);
+        if (i== word.length()-1) {
+            terminal = true;
+        }
+        results = current->addLetter(word[i], freq, terminal);
         current = std::get<0>(results);
         branchCount += std::get<1>(results);
         nodeCount += std::get<2>(results);
@@ -37,7 +41,7 @@ void Trie::addWord(std::string word, int freq)
 bool Trie::doesWordExist(std::string word)
 {
     Node *lastNode = rootNode->contains(word);
-    if (lastNode && lastNode->getBranches().size() == 0)
+    if (lastNode && lastNode->branches.size() == 0)
     {
         return true;
     }
@@ -77,7 +81,7 @@ Trie::Trie()
 #ifdef MAP
     cout << "Calling <Trie> constructor" << endl;
 #endif
-    rootNode = new Node();
+    rootNode = new Node(false, 0);
     branchCount = 0;
     nodeCount = 1;
 }

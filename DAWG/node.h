@@ -10,9 +10,9 @@ class Node
 {
 
 public:
-    std::pair<Node *, int> addLetter(char letter, int freq, bool terminal);
-    Node *contains(std::string word);
-    Node *hasLetter(char letter);
+    Node *addLetter(char letter, int freq, bool terminal);
+    Node *contains(std::string word, bool onlyRegistered=false);
+    Node *hasLetter(char letter, bool onlyRegistered=false);
     void getWords(std::vector<std::string> *words, std::string word);
     void printNode(int offset);
     Node(const Node &aNode);
@@ -22,6 +22,7 @@ public:
     bool terminal;
     int frequency;
     std::map<char, Node *> branches;
+    bool registered;
 };
 
 #endif // NODE_H

@@ -3,39 +3,37 @@
 #include <tuple>
 #include "node.h"
 
-std::pair<Node *, int> Node::addLetter(char letter, int freq, bool terminal)
+Node * Node::addLetter(char letter, int freq, bool terminal)
 {
     std::map<char, Node *>::iterator it = branches.find(letter);
     if (it == branches.end())
     {
         Node *newNode = new Node(terminal, freq);
         branches.insert(std::pair<char, Node *>(letter, newNode));
-        return std::make_pair(newNode, 1);
+        return newNode;
     }
     else
     {
         it->second->frequency += freq;
-        return std::make_pair(it->second, 0);
+        return it->second;
     }
 }
 
-Node *Node::contains(std::string word)
+Node *Node::contains(std::string word, bool onlyRegistered)
 {
     Node *current = this;
-    Node *final = NULL;
-    int i;
-    for (i = 0; i < word.length() && current; i++)
+    for (int i = 0; i < word.length() && current; i++)
     {
         current = current->hasLetter(word[i]);
     }
     return current;
 }
 
-Node *Node::hasLetter(char letter)
+Node *Node::hasLetter(char letter, bool onlyRegistered)
 {
     Node *nextNode = NULL;
     std::map<char, Node *>::iterator it = branches.find(letter);
-    if (it != branches.end())
+    if (it != branches.end() && (!onlyRegistered || it->second->registered == true))
     {
         nextNode = it->second;
     }
@@ -47,18 +45,20 @@ void Node::getWords(std::vector<std::string> *words, std::string word)
     std::map<char, Node *>::iterator it;
     for (it = branches.begin(); it != branches.end(); ++it)
     {
-        std::string tempWord = word + it->first;
-        if (it->second->branches.size() == 0)
-        {
-            words->push_back(tempWord);
-        }
-        else
-        {
-            if (it->second->terminal == true)
+        if(it->second->registered == true) {
+            std::string tempWord = word + it->first;
+            if (it->second->branches.size() == 0)
             {
                 words->push_back(tempWord);
             }
-            it->second->getWords(words, tempWord);
+            else
+            {
+                if (it->second->terminal == true)
+                {
+                    words->push_back(tempWord);
+                }
+                it->second->getWords(words, tempWord);
+            }
         }
     }
 }

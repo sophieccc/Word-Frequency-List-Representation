@@ -15,7 +15,7 @@ public:
     int getCommonPrefix(std::string current, std::string previous);
     void replace_or_register(Node *curr, int index, int prevFreq, int currFreq);
     bool checkEquivalence(Node *one, Node *two);
-    bool doesWordExist(std::string word);
+    bool doesWordExist(std::string word, bool onlyRegistered=false);
     int getNodeCount();
     int getBranchCount();
     std::vector<std::string> getLexicon();
@@ -23,7 +23,6 @@ public:
     Trie();
     virtual ~Trie();
 
-    int branchCount;
     std::vector<Node *> registered;
 
 protected:

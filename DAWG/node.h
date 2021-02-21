@@ -10,7 +10,7 @@ class Node
 {
 
 public:
-    std::tuple<Node*, int, int> addLetter(char letter, int freq, bool terminal);
+    std::pair<Node*, int> addLetter(char letter, int freq, bool terminal);
     Node *contains(std::string word);
     Node *hasLetter(char letter);
     void getWords(std::vector<std::string> *words, std::string word);
@@ -22,7 +22,6 @@ public:
     bool terminal;
     int frequency;
     std::map<char, Node*> branches;
-    bool registered;
 };
 
 #endif // NODE_H

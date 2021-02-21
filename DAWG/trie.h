@@ -11,9 +11,10 @@ class Trie
 public:
     void addLexicon(std::ifstream &file);
     void addSuffix(std::string word, int freq, Node* current);
-    void processWord(std::string word, int freq);
+    void processWord(std::string word, int prevFreq, int currFreq);
     int getCommonPrefix(std::string current, std::string previous);
-    void replace_or_register(Node* curr);
+    void replace_or_register(Node* curr, int index, int prevFreq, int currFreq);
+    bool checkEquivalence(Node* one, Node* two); 
     bool doesWordExist(std::string word);
     int getNodeCount();
     int getBranchCount();
@@ -22,12 +23,11 @@ public:
     Trie();
     virtual ~Trie();
 
-    int nodeCount;
     int branchCount;
-
+    std::vector<Node*> registered;
+    
 protected:
     Node *rootNode;
-    std::vector<Node*> allNodes;
     std::string lastWord;
 };
 

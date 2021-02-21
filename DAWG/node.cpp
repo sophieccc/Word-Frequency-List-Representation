@@ -3,16 +3,16 @@
 #include <tuple>
 #include "node.h"
 
-std::tuple<Node*, int, int> Node::addLetter(char letter, int freq, bool terminal)
+std::pair<Node*, int> Node::addLetter(char letter, int freq, bool terminal)
 {
     std::map<char,Node*>::iterator it = branches.find(letter);
     if ( it == branches.end() ) {
         Node *newNode = new Node(terminal, freq);
         branches.insert(std::pair<char,Node*>(letter,newNode));
-        return std::make_tuple(newNode,1,1);
+        return std::make_pair(newNode,1);
     } else {
             it->second->frequency += freq;
-            return std::make_tuple(it->second,0,0);
+            return std::make_pair(it->second,0);
     }
 }
 
@@ -89,7 +89,6 @@ Node::Node(bool terminality, int freq)
 {
     terminal = terminality;
     frequency = freq;
-    registered = false;
 #ifdef MAP
     cout << "Calling <Node> constructor" << endl;
 #endif

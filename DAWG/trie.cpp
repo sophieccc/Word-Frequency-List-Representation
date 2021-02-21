@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 
-
 #include "trie.h"
 #include "node.h"
 #include <tuple>
@@ -13,7 +12,7 @@ void Trie::addLexicon(std::ifstream &file)
     int lineCount = 0;
     int prevFreq = 0;
     int currFreq = 0;
-    while (getline(file, line) && lineCount<100000)
+    while (getline(file, line) && lineCount < 100000)
     {
         prevFreq = currFreq;
         int split = line.find(" ");
@@ -29,32 +28,37 @@ void Trie::addLexicon(std::ifstream &file)
 void Trie::processWord(std::string word, int prevFreq, int currFreq)
 {
     int lastIndex = getCommonPrefix(word, lastWord);
-    std::string prefix = word.substr(0,lastIndex);
+    std::string prefix = word.substr(0, lastIndex);
     std::string suffix = word.substr(lastIndex);
-    Node* tempNode = rootNode;
-    for(int i=0; i <=prefix.length(); i++) {
+    Node *tempNode = rootNode;
+    for (int i = 0; i <= prefix.length(); i++)
+    {
         tempNode->frequency += currFreq;
         tempNode = tempNode->hasLetter(prefix[i]);
     }
-    Node* lastPrefixState = rootNode->contains(prefix);
-    if(lastPrefixState!= NULL && lastPrefixState->branches.size()!=0) {
-        replace_or_register(lastPrefixState,lastIndex, prevFreq, currFreq);
+    Node *lastPrefixState = rootNode->contains(prefix);
+    if (lastPrefixState != NULL && lastPrefixState->branches.size() != 0)
+    {
+        replace_or_register(lastPrefixState, lastIndex, prevFreq, currFreq);
     }
     addSuffix(suffix, currFreq, lastPrefixState);
     lastWord = word;
 }
 
-void Trie::replace_or_register(Node* curr, int index, int prevFreq, int currFreq) 
+void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq)
 {
-    Node* child = curr->hasLetter(lastWord[index]);
-    if(child->branches.size() !=0) {
-        replace_or_register(child, index+1, prevFreq, currFreq);
+    Node *child = curr->hasLetter(lastWord[index]);
+    if (child->branches.size() != 0)
+    {
+        replace_or_register(child, index + 1, prevFreq, currFreq);
     }
     bool found = false;
-    for(int i=0; i < registered.size() && !found; i++) {
+    for (int i = 0; i < registered.size() && !found; i++)
+    {
         found = checkEquivalence(registered[i], child);
-        if(found) {
-                        std::cout << registered[i] << std::endl;
+        if (found)
+        {
+            std::cout << registered[i] << std::endl;
             std::cout << registered[i]->frequency << std::endl;
             registered[i]->frequency += prevFreq;
             curr->branches.find(lastWord[index])->second = registered[i];
@@ -63,19 +67,20 @@ void Trie::replace_or_register(Node* curr, int index, int prevFreq, int currFreq
             branchCount--;
         }
     }
-    if(!found) {
+    if (!found)
+    {
         registered.push_back(child);
     }
 }
 
-bool Trie::checkEquivalence(Node* one, Node* two) 
+bool Trie::checkEquivalence(Node *one, Node *two)
 {
-    if(one->terminal == two->terminal) 
+    if (one->terminal == two->terminal)
     {
-        if(one->branches.size() == two->branches.size()) 
+        if (one->branches.size() == two->branches.size())
         {
-            if(std::equal(one->branches.begin(), 
-            one->branches.end(),two->branches.begin()))
+            if (std::equal(one->branches.begin(),
+                           one->branches.end(), two->branches.begin()))
             {
                 return true;
             }
@@ -84,16 +89,18 @@ bool Trie::checkEquivalence(Node* one, Node* two)
     return false;
 }
 
-void Trie::addSuffix(std::string word, int freq, Node*current=NULL)
+void Trie::addSuffix(std::string word, int freq, Node *current = NULL)
 {
-    if (current == NULL) {
+    if (current == NULL)
+    {
         current = rootNode;
     }
-    std::pair <Node*, int> results;
+    std::pair<Node *, int> results;
     bool terminal = false;
     for (int i = 0; i < word.length(); i++)
     {
-        if (i== word.length()-1) {
+        if (i == word.length() - 1)
+        {
             terminal = true;
         }
         results = current->addLetter(word[i], freq, terminal);
@@ -102,17 +109,18 @@ void Trie::addSuffix(std::string word, int freq, Node*current=NULL)
     }
 }
 
-int Trie::getCommonPrefix(std::string current, std::string previous) 
+int Trie::getCommonPrefix(std::string current, std::string previous)
 {
     int i;
-    for(i=0; i < previous.length(); i++) {
-        if(previous[i] != current[i]) {
+    for (i = 0; i < previous.length(); i++)
+    {
+        if (previous[i] != current[i])
+        {
             return i;
         }
     }
     return i;
 }
-
 
 bool Trie::doesWordExist(std::string word)
 {

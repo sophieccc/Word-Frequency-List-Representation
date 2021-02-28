@@ -19,21 +19,21 @@ Node * Node::addLetter(char letter, int freq, bool terminal)
     }
 }
 
-Node *Node::contains(std::string word, bool onlyRegistered)
+Node *Node::contains(std::string word)
 {
     Node *current = this;
     for (int i = 0; i < word.length() && current; i++)
     {
-        current = current->hasLetter(word[i], onlyRegistered);
+        current = current->hasLetter(word[i]);
     }
     return current;
 }
 
-Node *Node::hasLetter(char letter, bool onlyRegistered)
+Node *Node::hasLetter(char letter)
 {
     Node *nextNode = NULL;
     std::map<char, Node *>::iterator it = branches.find(letter);
-    if (it != branches.end() && (!onlyRegistered || it->second->registered == true))
+    if (it != branches.end())
     {
         nextNode = it->second;
     }
@@ -45,20 +45,18 @@ void Node::getWords(std::vector<std::string> *words, std::string word)
     std::map<char, Node *>::iterator it;
     for (it = branches.begin(); it != branches.end(); ++it)
     {
-        if(it->second->registered == true) {
-            std::string tempWord = word + it->first;
-            if (it->second->branches.size() == 0)
+        std::string tempWord = word + it->first;
+        if (it->second->branches.size() == 0)
+        {
+            words->push_back(tempWord);
+        }
+        else
+        {
+            if (it->second->terminal == true)
             {
                 words->push_back(tempWord);
             }
-            else
-            {
-                if (it->second->terminal == true)
-                {
-                    words->push_back(tempWord);
-                }
-                it->second->getWords(words, tempWord);
-            }
+            it->second->getWords(words, tempWord);
         }
     }
 }

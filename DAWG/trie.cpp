@@ -13,7 +13,7 @@ void Trie::addLexicon(std::ifstream &file)
     int lineCount = 0;
     int prevFreq = 0;
     int currFreq = 0;
-    while (getline(file, line))
+    while (getline(file, line) && lineCount < 10000)
     {
         prevFreq = currFreq;
         int split = line.find(" ");
@@ -122,9 +122,9 @@ int Trie::getCommonPrefix(std::string current, std::string previous)
     return i;
 }
 
-bool Trie::doesWordExist(std::string word, bool onlyRegistered)
+bool Trie::doesWordExist(std::string word)
 {
-    Node *lastNode = rootNode->contains(word, onlyRegistered);
+    Node *lastNode = rootNode->contains(word);
     if (lastNode && lastNode->terminal == true)
     {
         return true;
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
             std::string input;
             std::cin >> input;
             std::cout << "Checking if " << input << " exists" << std::endl;
-            std::cout << trie.doesWordExist(input, true) << std::endl;
+            std::cout << trie.doesWordExist(input) << std::endl;
             break;
         }
         case 'c':
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
             std::cout << "Graph of ?:" << std::endl;
             std::string input;
             std::cin >> input;
-            Node *one = trie.rootNode->contains(input, true);
+            Node *one = trie.rootNode->contains(input);
             if (one != NULL)
             {
                 std::cout << "Graph of " << input << ":" << std::endl;

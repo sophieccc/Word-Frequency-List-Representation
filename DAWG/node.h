@@ -11,8 +11,8 @@ class Node
 
 public:
     Node *addLetter(char letter, int freq, bool terminal);
-    Node *contains(std::string word, bool onlyRegistered=false);
-    Node *hasLetter(char letter, bool onlyRegistered=false);
+    Node *contains(std::string word);
+    Node *hasLetter(char letter);
     void getWords(std::vector<std::string> *words, std::string word);
     void printNode(int offset);
     Node(const Node &aNode);

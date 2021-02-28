@@ -16,7 +16,7 @@ public:
     Node* traversePrefix(std::string prefix, int freq);
     void replace_or_register(Node *curr, int index, int prevFreq, int currFreq);
     bool checkEquivalence(Node *one, Node *two);
-    bool doesWordExist(std::string word, bool onlyRegistered=false);
+    bool doesWordExist(std::string word);
     int getNodeCount();
     int getBranchCount();
     std::vector<std::string> getLexicon();

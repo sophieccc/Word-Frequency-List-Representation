@@ -13,6 +13,7 @@ public:
     void addSuffix(std::string word, int freq, Node *current);
     void processWord(std::string word, int prevFreq, int currFreq);
     int getCommonPrefix(std::string current, std::string previous);
+    Node* traversePrefix(std::string prefix, int freq);
     void replace_or_register(Node *curr, int index, int prevFreq, int currFreq);
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(std::string word, bool onlyRegistered=false);
@@ -21,12 +22,11 @@ public:
     std::vector<std::string> getLexicon();
     Trie(const Trie &aTrie);
     Trie();
-    virtual ~Trie();
-
+    
+    Node *rootNode;
     std::vector<Node *> registered;
 
 protected:
-    Node *rootNode;
     std::string lastWord;
 };
 

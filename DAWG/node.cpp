@@ -24,7 +24,7 @@ Node *Node::contains(std::string word, bool onlyRegistered)
     Node *current = this;
     for (int i = 0; i < word.length() && current; i++)
     {
-        current = current->hasLetter(word[i]);
+        current = current->hasLetter(word[i], onlyRegistered);
     }
     return current;
 }
@@ -68,19 +68,19 @@ void Node::printNode(int offset)
     std::string tabs = "";
     for (int i = 0; i < offset; i++)
     {
-        tabs += "   ";
+        tabs += "     ";
     }
     std::string symb = " ";
     if (terminal)
     {
         symb = "!";
     }
-    std::cout << '*' << symb << tabs << std::endl;
+    std::cout << '*' << "|" << frequency << symb << tabs << std::endl;
 
     std::map<char, Node *>::iterator it;
     for (it = branches.begin(); it != branches.end(); ++it)
     {
-        std::cout << tabs << "--" << it->first << "|" << it->second->frequency << "-->";
+        std::cout << tabs << "--" << it->first << "-->";
         it->second->printNode(offset + 2);
     }
 }
@@ -98,12 +98,5 @@ Node::Node(bool terminality, int freq)
     frequency = freq;
 #ifdef MAP
     cout << "Calling <Node> constructor" << endl;
-#endif
-}
-
-Node::~Node()
-{
-#ifdef MAP
-    cout << "Calling destructor for <Node>" << endl;
 #endif
 }

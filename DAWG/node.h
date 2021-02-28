@@ -17,7 +17,6 @@ public:
     void printNode(int offset);
     Node(const Node &aNode);
     Node(bool terminality, int freq);
-    virtual ~Node();
 
     bool terminal;
     int frequency;

@@ -1,23 +1,9 @@
 #include <iostream>
 #include "node.h"
 
-Node * Node::addLetter(char letter, int freq, bool terminal, int id)
-{
-    std::map<char, Node *>::iterator it = branches.find(letter);
-    if (it == branches.end())
-    {
-        Node *newNode = new Node(terminal, freq, id);
-        branches.insert(std::pair<char, Node *>(letter, newNode));
-        return newNode;
-    }
-    else
-    {
-        it->second->frequency += freq;
-        return it->second;
-    }
-}
+using namespace std;
 
-Node *Node::hasWord(std::string word)
+Node *Node::hasWord(string word)
 {
     Node *current = this;
     for (int i = 0; i < word.length() && current; i++)
@@ -30,7 +16,7 @@ Node *Node::hasWord(std::string word)
 Node *Node::hasLetter(char letter)
 {
     Node *nextNode = NULL;
-    std::map<char, Node *>::iterator it = branches.find(letter);
+    map<char, Node *>::iterator it = branches.find(letter);
     if (it != branches.end())
     {
         nextNode = it->second;
@@ -38,12 +24,28 @@ Node *Node::hasLetter(char letter)
     return nextNode;
 }
 
-void Node::getWords(std::vector<std::string> *words, std::string word)
+Node * Node::addLetter(char letter, int freq, bool terminal, int id)
 {
-    std::map<char, Node *>::iterator it;
+    map<char, Node *>::iterator it = branches.find(letter);
+    if (it == branches.end())
+    {
+        Node *newNode = new Node(terminal, freq, id);
+        branches.insert(pair<char, Node *>(letter, newNode));
+        return newNode;
+    }
+    else
+    {
+        it->second->frequency += freq;
+        return it->second;
+    }
+}
+
+void Node::getWords(vector<string> *words, string word)
+{
+    map<char, Node *>::iterator it;
     for (it = branches.begin(); it != branches.end(); ++it)
     {
-        std::string tempWord = word + it->first;
+        string tempWord = word + it->first;
         if (it->second->branches.size() == 0)
         {
             words->push_back(tempWord);
@@ -61,31 +63,24 @@ void Node::getWords(std::vector<std::string> *words, std::string word)
 
 void Node::printNode(int offset)
 {
-    std::string tabs = "";
+    string tabs = "";
     for (int i = 0; i < offset; i++)
     {
         tabs += "     ";
     }
-    std::string symb = " ";
+    string symb = " ";
     if (terminal)
     {
         symb = "!";
     }
-    std::cout << "[" << id << "]" << symb << tabs << std::endl;
+    cout << "[" << id << "]" << symb << tabs << endl;
 
-    std::map<char, Node *>::iterator it;
+    map<char, Node *>::iterator it;
     for (it = branches.begin(); it != branches.end(); ++it)
     {
-        std::cout << tabs << "--" << it->first << "-->";
+        cout << tabs << "--" << it->first << "-->";
         it->second->printNode(offset + 2);
     }
-}
-
-Node::Node(const Node &aNode)
-{
-#ifdef MAP
-    cout << "Calling copy constructor for <Node>" << endl;
-#endif
 }
 
 Node::Node(bool terminality, int freq, int idInput)
@@ -93,7 +88,4 @@ Node::Node(bool terminality, int freq, int idInput)
     terminal = terminality;
     frequency = freq;
     id = idInput;
-#ifdef MAP
-    cout << "Calling <Node> constructor" << endl;
-#endif
 }

@@ -6,23 +6,24 @@
 #include <tuple>
 #include <map>
 
+using namespace std;
+
 class Node
 {
 
 public:
-    Node *hasWord(std::string word);
+    Node *hasWord(string word);
     Node *hasLetter(char letter);
     Node *addLetter(char letter, int freq, bool terminal, int id);
+    void getWords(vector<string> *words, string word);
     void printNode(int offset);
-    void getWords(std::vector<std::string> *words, std::string word);
-    Node(const Node &aNode);
     Node(bool terminality, int freq, int idInput);
 
     int id;
     bool terminal;
     bool registered;
     int frequency;
-    std::map<char, Node *> branches;
+    map<char, Node *> branches;
     
 };
 

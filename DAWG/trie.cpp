@@ -5,9 +5,11 @@
 #include "trie.h"
 #include "node.h"
 
-void Trie::addLexicon(std::ifstream &file)
+using namespace std;
+
+void Trie::addLexicon(ifstream &file)
 {
-    std::string line;
+    string line;
     int lineCount = 0;
     int prevFreq = 0;
     int currFreq = 0;
@@ -15,7 +17,7 @@ void Trie::addLexicon(std::ifstream &file)
     {
         prevFreq = currFreq;
         int split = line.find(" ");
-        std::string word = line.substr(0, split);
+        string word = line.substr(0, split);
         currFreq = stoi(line.substr(split));
         processWord(word, prevFreq, currFreq);
         lineCount++;
@@ -23,11 +25,11 @@ void Trie::addLexicon(std::ifstream &file)
     replace_or_register(rootNode, 0, currFreq, 0);
 }
 
-void Trie::processWord(std::string word, int prevFreq, int currFreq)
+void Trie::processWord(string word, int prevFreq, int currFreq)
 {
     int lastIndex = getCommonPrefix(word, lastWord);
-    std::string prefix = word.substr(0, lastIndex);
-    std::string suffix = word.substr(lastIndex);
+    string prefix = word.substr(0, lastIndex);
+    string suffix = word.substr(lastIndex);
     Node *lastPrefixState = traversePrefix(prefix, currFreq);
     if (lastPrefixState != NULL && lastPrefixState->branches.size() != 0)
     {
@@ -37,7 +39,7 @@ void Trie::processWord(std::string word, int prevFreq, int currFreq)
     lastWord = word;
 }
 
-Node *Trie::traversePrefix(std::string prefix, int freq)
+Node *Trie::traversePrefix(string prefix, int freq)
 {
     Node *tempNode = rootNode;
     for (int i = 0; i < prefix.length(); i++)
@@ -82,7 +84,7 @@ bool Trie::checkEquivalence(Node *one, Node *two)
     {
         if (one->branches.size() == two->branches.size())
         {
-            if (std::equal(one->branches.begin(),
+            if (equal(one->branches.begin(),
                            one->branches.end(), two->branches.begin()))
             {
                 return true;
@@ -92,7 +94,7 @@ bool Trie::checkEquivalence(Node *one, Node *two)
     return false;
 }
 
-void Trie::addSuffix(std::string word, int freq, Node *current = NULL)
+void Trie::addSuffix(string word, int freq, Node *current = NULL)
 {
     if (current == NULL)
     {
@@ -112,7 +114,7 @@ void Trie::addSuffix(std::string word, int freq, Node *current = NULL)
     }
 }
 
-int Trie::getCommonPrefix(std::string current, std::string previous)
+int Trie::getCommonPrefix(string current, string previous)
 {
     int i = 0;
     while (i < previous.length() && previous[i] == current[i])
@@ -122,7 +124,7 @@ int Trie::getCommonPrefix(std::string current, std::string previous)
     return i;
 }
 
-bool Trie::doesWordExist(std::string word)
+bool Trie::doesWordExist(string word)
 {
     Node *lastNode = rootNode->hasWord(word);
     if (lastNode && lastNode->terminal == true)
@@ -144,8 +146,8 @@ void Trie::calculateCounts()
 
 void Trie::findChildren(Node* curr) 
 {
-    std::map<char, Node *>::iterator it;
-    std::vector<Node*> children;
+    map<char, Node *>::iterator it;
+    vector<Node*> children;
     for (it = curr->branches.begin(); it != curr->branches.end(); ++it)
     {
         branchCount++;
@@ -157,26 +159,16 @@ void Trie::findChildren(Node* curr)
     }
 }
 
-std::vector<std::string> Trie::getLexicon()
+vector<string> Trie::getLexicon()
 {
-    std::vector<std::string> words = std::vector<std::string>();
-    std::string word = "";
+    vector<string> words = vector<string>();
+    string word = "";
     rootNode->getWords(&words, word);
     return words;
 }
 
-Trie::Trie(const Trie &aTrie)
-{
-#ifdef MAP
-    cout << "Calling copy constructor for <Trie>" << endl;
-#endif
-}
-
 Trie::Trie()
 {
-#ifdef MAP
-    cout << "Calling <Trie> constructor" << endl;
-#endif
     rootNode = new Node(false, 0, latestId);
     latestId++;
     lastWord = "";
@@ -189,45 +181,45 @@ Trie::Trie()
 int main(int argc, char *argv[])
 {
 
-    std::ifstream file;
-    file.open(argv[1], std::ios_base::in);
+    ifstream file;
+    file.open(argv[1], ios_base::in);
     Trie trie = Trie();
-    std::cout << "Adding Lexicon." << std::endl;
+    cout << "Adding Lexicon." << endl;
     trie.addLexicon(file);
-    std::cout << "Lexicon Added." << std::endl;
+    cout << "Lexicon Added." << endl;
 
     char c = 0;
     bool exit = false;
     do
     {
-        std::cin >> c;
+        cin >> c;
         switch (c)
         {
         case 'a':
         {
-            std::vector<std::string> words;
-            std::ofstream output_file("./results.txt");
-            std::cout << "Writing lexicon to file..." << std::endl;
+            vector<string> words;
+            ofstream output_file("./results.txt");
+            cout << "Writing lexicon to file..." << endl;
             words = trie.getLexicon();
-            std::ostream_iterator<std::string> output_iterator(output_file, "\n");
-            std::copy(words.begin(), words.end(), output_iterator);
-            std::cout << "Wrote lexicon to file." << std::endl;
+            ostream_iterator<string> output_iterator(output_file, "\n");
+            copy(words.begin(), words.end(), output_iterator);
+            cout << "Wrote lexicon to file." << endl;
             break;
         }
         case 'b':
         {
-            std::cout << "Check ? exists:" << std::endl;
-            std::string input;
-            std::cin >> input;
-            std::cout << "Checking if " << input << " exists" << std::endl;
-            std::cout << trie.doesWordExist(input) << std::endl;
+            cout << "Check ? exists:" << endl;
+            string input;
+            cin >> input;
+            cout << "Checking if " << input << " exists" << endl;
+            cout << trie.doesWordExist(input) << endl;
             break;
         }
         case 'c':
         {
-            std::cout << "Graph of ?: (if you want the full graph type * " << std::endl;
-            std::string input;
-            std::cin >> input;
+            cout << "Graph of ?: (if you want the full graph type * " << endl;
+            string input;
+            cin >> input;
             Node* one;
             if(input == "*") {
                 one = trie.rootNode;
@@ -237,20 +229,20 @@ int main(int argc, char *argv[])
             }
             if (one != NULL)
             {
-                std::cout << "Graph of " << input << ":" << std::endl;
+                cout << "Graph of " << input << ":" << endl;
                 one->printNode(0);
             }
             else
             {
-                std::cout << "Does not exist in trie." << std::endl;
+                cout << "Does not exist in trie." << endl;
             }
             break;
         }
         case 'd':
         {
             trie.calculateCounts();
-            std::cout << "Branch count:" << trie.branchCount << std::endl;
-            std::cout << "Node count:" << trie.nodeCount << std::endl;
+            cout << "Branch count:" << trie.branchCount << endl;
+            cout << "Node count:" << trie.nodeCount << endl;
             break;
         }
         default:

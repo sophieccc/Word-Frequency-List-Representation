@@ -13,7 +13,7 @@ void Trie::addLexicon(ifstream &file)
     int lineCount = 0;
     int prevFreq = 0;
     int currFreq = 0;
-    while (getline(file, line) && lineCount < 10000)
+    while (getline(file, line))
     {
         prevFreq = currFreq;
         int split = line.find(" ");

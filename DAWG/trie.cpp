@@ -1,11 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <string>
 
 #include "trie.h"
 #include "node.h"
-#include <tuple>
 
 void Trie::addLexicon(std::ifstream &file)
 {
@@ -23,7 +21,6 @@ void Trie::addLexicon(std::ifstream &file)
         lineCount++;
     }
     replace_or_register(rootNode, 0, currFreq, 0);
-    //rootNode->printNode(0);
 }
 
 void Trie::processWord(std::string word, int prevFreq, int currFreq)
@@ -108,7 +105,10 @@ void Trie::addSuffix(std::string word, int freq, Node *current = NULL)
         {
             terminal = true;
         }
-        current = current->addLetter(word[i], freq, terminal);
+        current = current->addLetter(word[i], freq, terminal, latestId);
+        if(current->id == latestId) {
+            latestId++;
+        }
     }
 }
 
@@ -124,7 +124,7 @@ int Trie::getCommonPrefix(std::string current, std::string previous)
 
 bool Trie::doesWordExist(std::string word)
 {
-    Node *lastNode = rootNode->contains(word);
+    Node *lastNode = rootNode->hasWord(word);
     if (lastNode && lastNode->terminal == true)
     {
         return true;
@@ -134,20 +134,27 @@ bool Trie::doesWordExist(std::string word)
         return false;
     }
 }
-
-int Trie::getBranchCount()
+void Trie::calculateCounts()
 {
-    int numBranches = 0;
-    for (int i = 0; i < registered.size(); i++)
-    {
-        numBranches += registered[i]->branches.size();
+    if(finalNodes.size() ==0) {
+        finalNodes[0] = rootNode;
+        findChildren(rootNode);
     }
-    return numBranches;
 }
 
-int Trie::getNodeCount()
+void Trie::findChildren(Node* curr) 
 {
-    return registered.size();
+    std::map<char, Node *>::iterator it;
+    std::vector<Node*> children;
+    for (it = curr->branches.begin(); it != curr->branches.end(); ++it)
+    {
+        branchCount++;
+        if(finalNodes.find(it->second->id)== finalNodes.end()) {
+            nodeCount++;
+            finalNodes[it->second->id] = it->second;
+            findChildren(it->second);
+        }
+    }
 }
 
 std::vector<std::string> Trie::getLexicon()
@@ -170,7 +177,8 @@ Trie::Trie()
 #ifdef MAP
     cout << "Calling <Trie> constructor" << endl;
 #endif
-    rootNode = new Node(false, 0);
+    rootNode = new Node(false, 0, latestId);
+    latestId++;
     lastWord = "";
     // Depends whether you want to include 
     // the root node and its branches in the counts
@@ -217,10 +225,16 @@ int main(int argc, char *argv[])
         }
         case 'c':
         {
-            std::cout << "Graph of ?:" << std::endl;
+            std::cout << "Graph of ?: (if you want the full graph type * " << std::endl;
             std::string input;
             std::cin >> input;
-            Node *one = trie.rootNode->contains(input);
+            Node* one;
+            if(input == "*") {
+                one = trie.rootNode;
+            }
+            else {
+                one = trie.rootNode->hasWord(input);
+            }
             if (one != NULL)
             {
                 std::cout << "Graph of " << input << ":" << std::endl;
@@ -234,12 +248,9 @@ int main(int argc, char *argv[])
         }
         case 'd':
         {
-            std::cout << "Branch count:" << trie.getBranchCount() << std::endl;
-            break;
-        }
-        case 'e':
-        {
-            std::cout << "Node count:" << trie.getNodeCount() << std::endl;
+            trie.calculateCounts();
+            std::cout << "Branch count:" << trie.branchCount << std::endl;
+            std::cout << "Node count:" << trie.nodeCount << std::endl;
             break;
         }
         default:

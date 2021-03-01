@@ -1,14 +1,12 @@
 #include <iostream>
-#include <string>
-#include <tuple>
 #include "node.h"
 
-Node * Node::addLetter(char letter, int freq, bool terminal)
+Node * Node::addLetter(char letter, int freq, bool terminal, int id)
 {
     std::map<char, Node *>::iterator it = branches.find(letter);
     if (it == branches.end())
     {
-        Node *newNode = new Node(terminal, freq);
+        Node *newNode = new Node(terminal, freq, id);
         branches.insert(std::pair<char, Node *>(letter, newNode));
         return newNode;
     }
@@ -19,7 +17,7 @@ Node * Node::addLetter(char letter, int freq, bool terminal)
     }
 }
 
-Node *Node::contains(std::string word)
+Node *Node::hasWord(std::string word)
 {
     Node *current = this;
     for (int i = 0; i < word.length() && current; i++)
@@ -73,7 +71,7 @@ void Node::printNode(int offset)
     {
         symb = "!";
     }
-    std::cout << '*' << "|" << frequency << symb << tabs << std::endl;
+    std::cout << "[" << id << "]" << symb << tabs << std::endl;
 
     std::map<char, Node *>::iterator it;
     for (it = branches.begin(); it != branches.end(); ++it)
@@ -90,10 +88,11 @@ Node::Node(const Node &aNode)
 #endif
 }
 
-Node::Node(bool terminality, int freq)
+Node::Node(bool terminality, int freq, int idInput)
 {
     terminal = terminality;
     frequency = freq;
+    id = idInput;
 #ifdef MAP
     cout << "Calling <Node> constructor" << endl;
 #endif

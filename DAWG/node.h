@@ -10,18 +10,20 @@ class Node
 {
 
 public:
-    Node *addLetter(char letter, int freq, bool terminal);
-    Node *contains(std::string word);
+    Node *hasWord(std::string word);
     Node *hasLetter(char letter);
-    void getWords(std::vector<std::string> *words, std::string word);
+    Node *addLetter(char letter, int freq, bool terminal, int id);
     void printNode(int offset);
+    void getWords(std::vector<std::string> *words, std::string word);
     Node(const Node &aNode);
-    Node(bool terminality, int freq);
+    Node(bool terminality, int freq, int idInput);
 
+    int id;
     bool terminal;
+    bool registered;
     int frequency;
     std::map<char, Node *> branches;
-    bool registered;
+    
 };
 
 #endif // NODE_H

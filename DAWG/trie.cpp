@@ -1,9 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
-
 #include "trie.h"
-#include "node.h"
 
 using namespace std;
 
@@ -176,6 +174,7 @@ Trie::Trie()
     // the root node and its branches in the counts
     //registered.push_back(rootNode);
     rootNode->registered = true;
+    minSet.insert(*rootNode);
 }
 
 int main(int argc, char *argv[])

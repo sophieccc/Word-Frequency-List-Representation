@@ -3,6 +3,12 @@
 
 using namespace std;
 
+bool Node::operator==(const Node& t) const
+{ 
+    bool eqTerminal = this->terminal == t.terminal;
+    bool eqBranches = equal(this->branches.begin(), this->branches.end(), t.branches.begin());
+    return eqTerminal && eqBranches;
+}
 Node *Node::hasWord(string word)
 {
     Node *current = this;

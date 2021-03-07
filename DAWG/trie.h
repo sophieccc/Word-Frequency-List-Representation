@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include "node.h"
 
 using namespace std;
@@ -33,6 +34,7 @@ protected:
     string lastWord;
     vector<Node *> registered;
     int latestId = 0;
+    unordered_set <Node, Node::MyHashFunction> minSet;
 };
 
 #endif // TRIE_H

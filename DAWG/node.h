@@ -12,6 +12,7 @@ class Node
 {
 
 public:
+    bool operator==(const Node& t) const;
     Node *hasWord(string word);
     Node *hasLetter(char letter);
     Node *addLetter(char letter, int freq, bool terminal, int id);
@@ -24,6 +25,27 @@ public:
     bool registered;
     int frequency;
     map<char, Node *> branches;
+
+    struct MyHashFunction
+    {
+        size_t operator()(const Node& n) const
+        {
+            string hashStr;
+            if(n.terminal==true) {
+                hashStr += "1";
+            }
+            else {
+                hashStr +='0';
+            }
+            for (auto it = n.branches.begin(); it != n.branches.end(); ++it)
+            {
+                hashStr+=it->first;
+                hashStr+=to_string(it->second->id);
+            }
+
+            return hash<string>()(hashStr); 
+        }
+    };
     
 };
 

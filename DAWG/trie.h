@@ -22,19 +22,18 @@ public:
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();
-    void findChildren(Node* curr);
     Trie();
     
     Node *rootNode;
     int nodeCount;
     int branchCount;
+    unordered_multiset <Node*, Node::MyHashFunction, Node::MyEqualFunction> minSet;
 
 protected:
     map<int, Node *> finalNodes;
     string lastWord;
     vector<Node *> registered;
     int latestId = 0;
-    unordered_set <Node, Node::MyHashFunction> minSet;
 };
 
 #endif // TRIE_H

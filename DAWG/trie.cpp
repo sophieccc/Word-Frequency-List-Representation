@@ -57,21 +57,24 @@ void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq
         {
             replace_or_register(child, index + 1, prevFreq, currFreq);
         }
-        bool found = false;
-        for (int i = 0; i < registered.size() && !found; i++)
+        auto res = minSet.equal_range(child);
+        if(res.first == minSet.end())
         {
-            found = checkEquivalence(registered[i], child);
-            if (found)
-            {
-                registered[i]->frequency += prevFreq;
-                curr->branches.find(lastWord[index])->second = registered[i];
-                delete child;
-            }
-        }
-        if (!found)
-        {
-            registered.push_back(child);
             child->registered = true;
+            minSet.insert(child);
+        }
+        else
+        {
+            bool found = false;
+            for (auto it = res.first; it != res.second && !found; ++it) {
+                Node* n = *it;
+                if(checkEquivalence(n, child) == true) {
+                    found = true;
+                    n->frequency += prevFreq;
+                    curr->branches.find(lastWord[index])->second = n;
+                    delete child; 
+                }
+            }
         }
     }
 }
@@ -136,23 +139,14 @@ bool Trie::doesWordExist(string word)
 }
 void Trie::calculateCounts()
 {
-    if(finalNodes.size() ==0) {
-        finalNodes[0] = rootNode;
-        findChildren(rootNode);
-    }
-}
-
-void Trie::findChildren(Node* curr) 
-{
-    map<char, Node *>::iterator it;
-    vector<Node*> children;
-    for (it = curr->branches.begin(); it != curr->branches.end(); ++it)
-    {
-        branchCount++;
-        if(finalNodes.find(it->second->id)== finalNodes.end()) {
-            nodeCount++;
-            finalNodes[it->second->id] = it->second;
-            findChildren(it->second);
+    if(nodeCount == 0) {
+        nodeCount = minSet.size();
+        for(auto it = minSet.begin(); it !=minSet.end(); ++it) {
+            Node* curr = *it;
+            for (auto iter = curr->branches.begin(); iter != curr->branches.end(); ++iter)
+            {
+                branchCount++;
+            }
         }
     }
 }
@@ -170,11 +164,10 @@ Trie::Trie()
     rootNode = new Node(false, 0, latestId);
     latestId++;
     lastWord = "";
-    // Depends whether you want to include 
-    // the root node and its branches in the counts
-    //registered.push_back(rootNode);
+    minSet.insert(rootNode);
     rootNode->registered = true;
-    minSet.insert(*rootNode);
+    nodeCount = 0;
+    branchCount = 0;
 }
 
 int main(int argc, char *argv[])

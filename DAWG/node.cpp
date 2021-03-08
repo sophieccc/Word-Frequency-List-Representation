@@ -48,8 +48,7 @@ Node * Node::addLetter(char letter, int freq, bool terminal, int id)
 
 void Node::getWords(vector<string> *words, string word)
 {
-    map<char, Node *>::iterator it;
-    for (it = branches.begin(); it != branches.end(); ++it)
+    for (auto it = branches.begin(); it != branches.end(); ++it)
     {
         string tempWord = word + it->first;
         if (it->second->branches.size() == 0)
@@ -80,9 +79,7 @@ void Node::printNode(int offset)
         symb = "!";
     }
     cout << "[" << id << "]" << symb << tabs << endl;
-
-    map<char, Node *>::iterator it;
-    for (it = branches.begin(); it != branches.end(); ++it)
+    for (auto it = branches.begin(); it != branches.end(); ++it)
     {
         cout << tabs << "--" << it->first << "-->";
         it->second->printNode(offset + 2);
@@ -94,4 +91,5 @@ Node::Node(bool terminality, int freq, int idInput)
     terminal = terminality;
     frequency = freq;
     id = idInput;
+    registered = false;
 }

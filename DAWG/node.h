@@ -22,28 +22,39 @@ public:
 
     int id;
     bool terminal;
-    bool registered;
-    int frequency;
+    mutable bool registered;
+    mutable int frequency;
     map<char, Node *> branches;
 
     struct MyHashFunction
     {
-        size_t operator()(const Node& n) const
+        size_t operator()(const Node* n) const
         {
             string hashStr;
-            if(n.terminal==true) {
+            if(n->terminal==true) {
                 hashStr += "1";
             }
             else {
                 hashStr +='0';
             }
-            for (auto it = n.branches.begin(); it != n.branches.end(); ++it)
+            for (auto it = n->branches.begin(); it != n->branches.end(); ++it)
             {
                 hashStr+=it->first;
                 hashStr+=to_string(it->second->id);
             }
+            hashStr += n->branches.size();
 
             return hash<string>()(hashStr); 
+        }
+    };
+
+    struct MyEqualFunction
+    {
+        bool operator()(const Node* lhs, const Node* rhs) const
+        {
+            bool eqTerminal = lhs->terminal ==rhs->terminal;
+            bool eqBranches = equal(lhs->branches.begin(), lhs->branches.end(),rhs->branches.begin());
+            return eqTerminal && eqBranches;
         }
     };
     

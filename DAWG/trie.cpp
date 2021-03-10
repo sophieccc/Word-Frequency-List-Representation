@@ -131,6 +131,52 @@ void Trie::addSuffix(string word, int freq, Node *current = NULL)
     }
 }
 
+int Trie::getWordFrequency(string word) {
+    if(doesWordExist(word)) {
+        Node* curr = rootNode;
+        // The total frequency of the node's outgoing branches.
+        int nodeFreq = getTotal(curr);
+        // The total frequency of the entire dawg (every word).
+        int dawgFreq = nodeFreq;
+        // The current frequency result for the word. 
+        int currResult = 0;
+        // The frequency of the branch for the current letter.
+        int branchFreq = 0;
+        // The frequency of all terminal nodes that have been traversed.
+        int terminalFreq = 0;
+        for(int i=0; i < word.size(); i++) {
+            branchFreq = curr->branchFreqs.find(word[i])->second;
+            currResult += (branchFreq - nodeFreq);
+            curr = curr->branches.find(word[i])->second;
+            nodeFreq = getTotal(curr);
+            // Subtracting the frequency going into the next node from the 
+            // total outgoing frequency of the next node gives the frequency that
+            // is no longer going anywhere, i.e. the freq of the terminating word.  
+            if(curr->terminal && i!=word.size()-1) {
+                terminalFreq += (nodeFreq - branchFreq);
+            }
+        }
+        currResult +=terminalFreq;
+        // Need to take into account outgoing frequencies if there are
+        // more branches coming out of the final node. 
+        if(curr->branches.size()>0) {
+            currResult -= nodeFreq;
+        }
+        currResult +=dawgFreq;
+        return currResult;
+    }
+    else {
+        return -1;
+    }
+}
+
+int Trie::getTotal(Node* n) {
+    int total = 0;
+    for(auto it = n->branchFreqs.begin(); it!=n->branchFreqs.end(); ++it) {
+        total += it->second;
+    }
+    return total;
+}
 int Trie::getCommonPrefix(string current, string previous)
 {
     int i = 0;
@@ -251,6 +297,15 @@ int main(int argc, char *argv[])
             trie.calculateCounts();
             cout << "Branch count:" << trie.branchCount << endl;
             cout << "Node count:" << trie.nodeCount << endl;
+            break;
+        }
+        case 'e':
+        {
+            cout << "Check ? frequency:" << endl;
+            string input;
+            cin >> input;
+            cout << "Checking frequency of " << input<< endl;
+            cout << trie.getWordFrequency(input) << endl;
             break;
         }
         default:

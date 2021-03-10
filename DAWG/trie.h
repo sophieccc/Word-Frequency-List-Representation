@@ -23,6 +23,8 @@ public:
     bool doesWordExist(string word);
     void calculateCounts();
     void addFrequencies(Node* n, int freq);
+    int getWordFrequency(string word);
+    int getTotal(Node* n);
     Trie();
     
     Node *rootNode;

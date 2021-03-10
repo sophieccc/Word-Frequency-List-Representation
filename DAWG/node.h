@@ -18,13 +18,13 @@ public:
     Node *addLetter(char letter, int freq, bool terminal, int id);
     void getWords(vector<string> *words, string word);
     void printNode(int offset);
-    Node(bool terminality, int freq, int idInput);
+    Node(bool terminality, int idInput);
 
     int id;
     bool terminal;
     mutable bool registered;
-    mutable int frequency;
     map<char, Node *> branches;
+    map<char, int> branchFreqs;
 
     struct MyHashFunction
     {

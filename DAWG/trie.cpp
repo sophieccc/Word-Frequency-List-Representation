@@ -42,14 +42,17 @@ Node *Trie::traversePrefix(string prefix, int freq)
     Node *tempNode = rootNode;
     for (int i = 0; i < prefix.length(); i++)
     {
-        tempNode->frequency += freq;
+        auto it = tempNode->branchFreqs.find(prefix[i]);
+        if(it!=tempNode->branchFreqs.end()) {
+            it->second +=freq;
+        }
         tempNode = tempNode->hasLetter(prefix[i]);
     }
-    tempNode->frequency += freq;
     return tempNode;
 }
 void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq)
 {
+    shared = false;
     Node *child = curr->hasLetter(lastWord[index]);
     if (child != NULL && child->registered != true)
     {
@@ -62,6 +65,10 @@ void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq
         {
             child->registered = true;
             minSet.insert(child);
+            if(shared == true && index < lastWord.size()-1) {
+                addFrequencies(child->branches.find(lastWord[index+1])->second, prevFreq);
+            }
+            shared = false;
         }
         else
         {
@@ -69,12 +76,21 @@ void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq
             for (auto it = res.first; it != res.second && !found; ++it) {
                 Node* n = *it;
                 if(checkEquivalence(n, child) == true) {
+                    shared = true;
                     found = true;
-                    n->frequency += prevFreq;
                     curr->branches.find(lastWord[index])->second = n;
                     delete child; 
                 }
             }
+        }
+    }
+}
+
+void Trie::addFrequencies(Node* n, int freq) {
+    if(n->terminal == false) {
+        for (auto it = n->branches.begin(); it != n->branches.end(); ++it){
+            n->branchFreqs.find(it->first)->second += freq;
+            addFrequencies(it->second, freq);
         }
     }
 }
@@ -161,7 +177,7 @@ vector<string> Trie::getLexicon()
 
 Trie::Trie()
 {
-    rootNode = new Node(false, 0, latestId);
+    rootNode = new Node(false, latestId);
     latestId++;
     lastWord = "";
     minSet.insert(rootNode);

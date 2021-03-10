@@ -35,13 +35,14 @@ Node * Node::addLetter(char letter, int freq, bool terminal, int id)
     map<char, Node *>::iterator it = branches.find(letter);
     if (it == branches.end())
     {
-        Node *newNode = new Node(terminal, freq, id);
+        Node *newNode = new Node(terminal, id);
+        branchFreqs.insert(pair<char, int>(letter, freq));
         branches.insert(pair<char, Node *>(letter, newNode));
         return newNode;
     }
     else
     {
-        it->second->frequency += freq;
+        branchFreqs.find(letter)->second +=freq;
         return it->second;
     }
 }
@@ -71,7 +72,7 @@ void Node::printNode(int offset)
     string tabs = "";
     for (int i = 0; i < offset; i++)
     {
-        tabs += "     ";
+        tabs += "      ";
     }
     string symb = " ";
     if (terminal)
@@ -81,15 +82,14 @@ void Node::printNode(int offset)
     cout << "[" << id << "]" << symb << tabs << endl;
     for (auto it = branches.begin(); it != branches.end(); ++it)
     {
-        cout << tabs << "--" << it->first << "-->";
+        cout << tabs << "--" << it->first << "-" << branchFreqs.find(it->first)->second << "-->";
         it->second->printNode(offset + 2);
     }
 }
 
-Node::Node(bool terminality, int freq, int idInput)
+Node::Node(bool terminality, int idInput)
 {
     terminal = terminality;
-    frequency = freq;
     id = idInput;
     registered = false;
 }

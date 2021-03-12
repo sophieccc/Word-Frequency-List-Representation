@@ -12,7 +12,7 @@ class Node
 {
 
 public:
-    bool operator==(const Node& t) const;
+    bool operator==(const Node &t) const;
     Node *hasWord(string word);
     Node *hasLetter(char letter);
     Node *addLetter(char letter, int freq, bool terminal, int id);
@@ -28,36 +28,37 @@ public:
 
     struct MyHashFunction
     {
-        size_t operator()(const Node* n) const
+        size_t operator()(const Node *n) const
         {
             string hashStr;
-            if(n->terminal==true) {
+            if (n->terminal == true)
+            {
                 hashStr += "1";
             }
-            else {
-                hashStr +='0';
+            else
+            {
+                hashStr += '0';
             }
             for (auto it = n->branches.begin(); it != n->branches.end(); ++it)
             {
-                hashStr+=it->first;
-                hashStr+=to_string(it->second->id);
+                hashStr += it->first;
+                hashStr += to_string(it->second->id);
             }
             hashStr += n->branches.size();
 
-            return hash<string>()(hashStr); 
+            return hash<string>()(hashStr);
         }
     };
 
     struct MyEqualFunction
     {
-        bool operator()(const Node* lhs, const Node* rhs) const
+        bool operator()(const Node *lhs, const Node *rhs) const
         {
-            bool eqTerminal = lhs->terminal ==rhs->terminal;
-            bool eqBranches = equal(lhs->branches.begin(), lhs->branches.end(),rhs->branches.begin());
+            bool eqTerminal = lhs->terminal == rhs->terminal;
+            bool eqBranches = equal(lhs->branches.begin(), lhs->branches.end(), rhs->branches.begin());
             return eqTerminal && eqBranches;
         }
     };
-    
 };
 
 #endif // NODE_H

@@ -16,21 +16,21 @@ public:
     void addLexicon(ifstream &file);
     void processWord(string word, int prevFreq, int currFreq);
     int getCommonPrefix(string current, string previous);
-    Node* traversePrefix(string prefix, int freq);
+    Node *traversePrefix(string prefix, int freq);
     void addSuffix(string word, int freq, Node *current);
     void replace_or_register(Node *curr, int index, int prevFreq, int currFreq);
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();
-    void addFrequencies(Node* n, int freq);
+    void addFrequencies(Node *n, int freq);
     int getWordFrequency(string word);
-    int getTotal(Node* n);
+    int getTotal(Node *n);
     Trie();
-    
+
     Node *rootNode;
     int nodeCount;
     int branchCount;
-    unordered_multiset <Node*, Node::MyHashFunction, Node::MyEqualFunction> minSet;
+    unordered_multiset<Node *, Node::MyHashFunction, Node::MyEqualFunction> minSet;
 
 protected:
     map<int, Node *> finalNodes;

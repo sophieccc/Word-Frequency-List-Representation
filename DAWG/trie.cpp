@@ -43,8 +43,9 @@ Node *Trie::traversePrefix(string prefix, int freq)
     for (int i = 0; i < prefix.length(); i++)
     {
         auto it = tempNode->branchFreqs.find(prefix[i]);
-        if(it!=tempNode->branchFreqs.end()) {
-            it->second +=freq;
+        if (it != tempNode->branchFreqs.end())
+        {
+            it->second += freq;
         }
         tempNode = tempNode->hasLetter(prefix[i]);
     }
@@ -61,34 +62,40 @@ void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq
             replace_or_register(child, index + 1, prevFreq, currFreq);
         }
         auto res = minSet.equal_range(child);
-        if(res.first == minSet.end())
+        if (res.first == minSet.end())
         {
             child->registered = true;
             minSet.insert(child);
-            if(shared == true && index < lastWord.size()-1) {
-                addFrequencies(child->branches.find(lastWord[index+1])->second, prevFreq);
+            if (shared == true && index < lastWord.size() - 1)
+            {
+                addFrequencies(child->branches.find(lastWord[index + 1])->second, prevFreq);
             }
             shared = false;
         }
         else
         {
             bool found = false;
-            for (auto it = res.first; it != res.second && !found; ++it) {
-                Node* n = *it;
-                if(checkEquivalence(n, child) == true) {
+            for (auto it = res.first; it != res.second && !found; ++it)
+            {
+                Node *n = *it;
+                if (checkEquivalence(n, child) == true)
+                {
                     shared = true;
                     found = true;
                     curr->branches.find(lastWord[index])->second = n;
-                    delete child; 
+                    delete child;
                 }
             }
         }
     }
 }
 
-void Trie::addFrequencies(Node* n, int freq) {
-    if(n->terminal == false) {
-        for (auto it = n->branches.begin(); it != n->branches.end(); ++it){
+void Trie::addFrequencies(Node *n, int freq)
+{
+    if (n->terminal == false)
+    {
+        for (auto it = n->branches.begin(); it != n->branches.end(); ++it)
+        {
             n->branchFreqs.find(it->first)->second += freq;
             addFrequencies(it->second, freq);
         }
@@ -102,7 +109,7 @@ bool Trie::checkEquivalence(Node *one, Node *two)
         if (one->branches.size() == two->branches.size())
         {
             if (equal(one->branches.begin(),
-                           one->branches.end(), two->branches.begin()))
+                      one->branches.end(), two->branches.begin()))
             {
                 return true;
             }
@@ -125,54 +132,63 @@ void Trie::addSuffix(string word, int freq, Node *current = NULL)
             terminal = true;
         }
         current = current->addLetter(word[i], freq, terminal, latestId);
-        if(current->id == latestId) {
+        if (current->id == latestId)
+        {
             latestId++;
         }
     }
 }
 
-int Trie::getWordFrequency(string word) {
-    if(doesWordExist(word)) {
-        Node* curr = rootNode;
+int Trie::getWordFrequency(string word)
+{
+    if (doesWordExist(word))
+    {
+        Node *curr = rootNode;
         // The total frequency of the node's outgoing branches.
         int nodeFreq = getTotal(curr);
         // The total frequency of the entire dawg (every word).
         int dawgFreq = nodeFreq;
-        // The current frequency result for the word. 
+        // The current frequency result for the word.
         int currResult = 0;
         // The frequency of the branch for the current letter.
         int branchFreq = 0;
         // The frequency of all terminal nodes that have been traversed.
         int terminalFreq = 0;
-        for(int i=0; i < word.size(); i++) {
+        for (int i = 0; i < word.size(); i++)
+        {
             branchFreq = curr->branchFreqs.find(word[i])->second;
             currResult += (branchFreq - nodeFreq);
             curr = curr->branches.find(word[i])->second;
             nodeFreq = getTotal(curr);
-            // Subtracting the frequency going into the next node from the 
+            // Subtracting the frequency going into the next node from the
             // total outgoing frequency of the next node gives the frequency that
-            // is no longer going anywhere, i.e. the freq of the terminating word.  
-            if(curr->terminal && i!=word.size()-1) {
+            // is no longer going anywhere, i.e. the freq of the terminating word.
+            if (curr->terminal && i != word.size() - 1)
+            {
                 terminalFreq += (nodeFreq - branchFreq);
             }
         }
-        currResult +=terminalFreq;
+        currResult += terminalFreq;
         // Need to take into account outgoing frequencies if there are
-        // more branches coming out of the final node. 
-        if(curr->branches.size()>0) {
+        // more branches coming out of the final node.
+        if (curr->branches.size() > 0)
+        {
             currResult -= nodeFreq;
         }
-        currResult +=dawgFreq;
+        currResult += dawgFreq;
         return currResult;
     }
-    else {
+    else
+    {
         return -1;
     }
 }
 
-int Trie::getTotal(Node* n) {
+int Trie::getTotal(Node *n)
+{
     int total = 0;
-    for(auto it = n->branchFreqs.begin(); it!=n->branchFreqs.end(); ++it) {
+    for (auto it = n->branchFreqs.begin(); it != n->branchFreqs.end(); ++it)
+    {
         total += it->second;
     }
     return total;
@@ -201,10 +217,12 @@ bool Trie::doesWordExist(string word)
 }
 void Trie::calculateCounts()
 {
-    if(nodeCount == 0) {
+    if (nodeCount == 0)
+    {
         nodeCount = minSet.size();
-        for(auto it = minSet.begin(); it !=minSet.end(); ++it) {
-            Node* curr = *it;
+        for (auto it = minSet.begin(); it != minSet.end(); ++it)
+        {
+            Node *curr = *it;
             for (auto iter = curr->branches.begin(); iter != curr->branches.end(); ++iter)
             {
                 branchCount++;
@@ -274,11 +292,13 @@ int main(int argc, char *argv[])
             cout << "Graph of ?: (if you want the full graph type * " << endl;
             string input;
             cin >> input;
-            Node* one;
-            if(input == "*") {
+            Node *one;
+            if (input == "*")
+            {
                 one = trie.rootNode;
             }
-            else {
+            else
+            {
                 one = trie.rootNode->hasWord(input);
             }
             if (one != NULL)
@@ -304,7 +324,7 @@ int main(int argc, char *argv[])
             cout << "Check ? frequency:" << endl;
             string input;
             cin >> input;
-            cout << "Checking frequency of " << input<< endl;
+            cout << "Checking frequency of " << input << endl;
             cout << trie.getWordFrequency(input) << endl;
             break;
         }

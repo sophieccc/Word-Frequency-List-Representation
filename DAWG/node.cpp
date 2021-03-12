@@ -3,8 +3,8 @@
 
 using namespace std;
 
-bool Node::operator==(const Node& t) const
-{ 
+bool Node::operator==(const Node &t) const
+{
     bool eqTerminal = this->terminal == t.terminal;
     bool eqBranches = equal(this->branches.begin(), this->branches.end(), t.branches.begin());
     return eqTerminal && eqBranches;
@@ -30,7 +30,7 @@ Node *Node::hasLetter(char letter)
     return nextNode;
 }
 
-Node * Node::addLetter(char letter, int freq, bool terminal, int id)
+Node *Node::addLetter(char letter, int freq, bool terminal, int id)
 {
     map<char, Node *>::iterator it = branches.find(letter);
     if (it == branches.end())
@@ -42,7 +42,7 @@ Node * Node::addLetter(char letter, int freq, bool terminal, int id)
     }
     else
     {
-        branchFreqs.find(letter)->second +=freq;
+        branchFreqs.find(letter)->second += freq;
         return it->second;
     }
 }

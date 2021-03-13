@@ -92,4 +92,5 @@ Node::Node(bool terminality, int idInput)
     terminal = terminality;
     id = idInput;
     registered = false;
+    counter = -1;
 }

@@ -21,6 +21,7 @@ public:
     Node(bool terminality, int idInput);
 
     int id;
+    int counter;
     bool terminal;
     mutable bool registered;
     map<char, Node *> branches;

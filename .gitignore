@@ -7,3 +7,4 @@ de_full.txt
 *.txt
 .vscode/tasks.json
 .vscode/launch.json
+DAWG/output

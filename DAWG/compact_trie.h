@@ -17,7 +17,7 @@ public:
 
 protected:
     int counter;
-    vector<pair<char,bool>> branchList;
+    vector<pair<pair<char,int>,bool>> branchList;
     vector<pair<int,bool>> nodeList;
     queue<Node*> nodes;
 };

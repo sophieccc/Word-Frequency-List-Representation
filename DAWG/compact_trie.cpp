@@ -37,7 +37,8 @@ void CompactTrie::processTrie(Trie t)
             {
                 last = true;
             }
-            branchList.push_back(pair<char, bool>(it->first, last));
+            int freq = curr->branchFreqs.find(it->first)->second;
+            branchList.push_back(pair<pair<char,int>, bool>(pair<char,int>(it->first, freq), last));
             processNode(it->second, last);
         }
         nodes.pop();
@@ -82,7 +83,7 @@ bool CompactTrie::doesWordExist(string word)
         while (!foundChar && !lastBranch)
         {
             lastBranch = branchList[index].second;
-            if (branchList[index].first == word[i])
+            if (branchList[index].first.first == word[i])
             {
                 if (i < word.size() - 1)
                 {

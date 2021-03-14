@@ -7,11 +7,13 @@ using namespace std;
 
 // Compacted = Read pre-created array ver. of trie.
 // Non-Compacted = Read word-freq list to first create pointer ver. of trie.
-CompactTrie::CompactTrie(ifstream &file, bool compacted)
+CompactTrie::CompactTrie(string fileName, bool compacted)
 {
+    ifstream file;
+    file.open(fileName, ios_base::in);
     if (compacted)
     {
-        // Read in arrays.
+        readFromFile(fileName);
     }
     else
     {
@@ -38,14 +40,15 @@ void CompactTrie::processTrie(Trie t)
                 last = true;
             }
             int freq = curr->branchFreqs.find(it->first)->second;
-            branchList.push_back(pair<pair<char,int>, bool>(pair<char,int>(it->first, freq), last));
+            branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(it->first, freq), last));
             processNode(it->second, last);
         }
         nodes.pop();
     }
 }
 
-void CompactTrie::processNode(Node* n, bool last) {
+void CompactTrie::processNode(Node *n, bool last)
+{
     if (n->counter == -1)
     {
         n->counter = counter;
@@ -104,10 +107,62 @@ bool CompactTrie::doesWordExist(string word)
     return nodeList[index].second;
 }
 
+void CompactTrie::writeToFile(string fileName)
+{
+    std::ofstream outfile;
+    outfile.open(fileName, ios::out | ios::binary);
+    for (auto it = branchList.begin(); it != branchList.end(); ++it)
+    {
+        unsigned char letter = it->first.first;
+        unsigned int frequency = it->first.second;
+        bool onlyDaughter = it->second;
+        outfile.write((char *)(&letter), sizeof(letter));
+        outfile.write((char *)(&frequency), sizeof(frequency));
+        outfile.write((char *)(&onlyDaughter), sizeof(onlyDaughter));
+    }
+    outfile << "\n";
+    for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
+    {
+        bool terminal = it->second;
+        unsigned int index = it->first;
+        outfile.write((char *)(&terminal), sizeof(terminal));
+        outfile.write((char *)(&index), sizeof(index));
+    }
+}
+
+void CompactTrie::readFromFile(string fileName)
+{
+    std::ifstream infile;
+    infile.open(fileName, ios::in | ios::binary);
+    unsigned char curr;
+    infile.read((char *)(&curr), sizeof(curr));
+    while (curr != '\n')
+    {
+        unsigned char letter;
+        unsigned int frequency = 0;
+        bool onlyDaughter;
+        letter = curr;
+        infile.read(reinterpret_cast<char *>(&curr), sizeof(int));
+        frequency += curr;
+        infile.read(reinterpret_cast<char *>(&curr), sizeof(bool));
+        onlyDaughter = curr;
+        cout << letter << " " << frequency << " " << onlyDaughter << endl;
+        infile.read((char *)(&curr), sizeof(curr));
+    }
+    cout << endl;
+    while (infile.read(reinterpret_cast<char *>(&curr), sizeof(bool)))
+    {
+        bool terminal = curr;
+        unsigned int index = 0;
+        infile.read(reinterpret_cast<char *>(&curr), sizeof(int));
+        index += curr;
+        cout << terminal << " " << index << endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
-
-    ifstream file;
-    file.open(argv[1], ios_base::in);
-    CompactTrie compactTrie = CompactTrie(file, false);
+    CompactTrie compactTrie = CompactTrie(argv[1], false);
+    compactTrie.writeToFile("compact.txt");
+    compactTrie.readFromFile("compact.txt");
 }

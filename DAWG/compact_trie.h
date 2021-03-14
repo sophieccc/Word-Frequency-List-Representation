@@ -10,10 +10,12 @@ class CompactTrie
 {
 
 public:
-    CompactTrie(ifstream &file, bool compacted);
+    CompactTrie(string fileName, bool compacted);
     bool doesWordExist(string word);
     void processTrie(Trie t);
     void processNode(Node* n, bool lastBranch);
+    void writeToFile(string fileName);
+    void readFromFile(string fileName);
 
 protected:
     int counter;

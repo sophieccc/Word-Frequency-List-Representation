@@ -9,6 +9,7 @@ using namespace std;
 // Non-Compacted = Read word-freq list to first create pointer ver. of trie.
 CompactTrie::CompactTrie(string fileName, bool compacted)
 {
+    createCode();
     ifstream file;
     file.open(fileName, ios_base::in);
     if (compacted)
@@ -22,6 +23,21 @@ CompactTrie::CompactTrie(string fileName, bool compacted)
         trie.addLexicon(file);
         cout << "Lexicon Added." << endl;
         processTrie(trie);
+    }
+}
+
+void CompactTrie::createCode()
+{
+    for(int i=1; i<=256; i+=64) 
+    {
+        int index = i;
+        for(char l = 'a'; l<='z'; ++l) {
+            numToChar[index] = l;
+            if(i==1) {
+                charToNum[l] = index;
+            }
+            index++;
+        }
     }
 }
 
@@ -113,19 +129,22 @@ void CompactTrie::writeToFile(string fileName)
     outfile.open(fileName, ios::out | ios::binary);
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
-        unsigned char letter = it->first.first;
+        unsigned char letter = charToNum.at(it->first.first);
+        if(it->second) {
+          letter+=64;  
+        }
+        int index = it - branchList.begin();
+        if(nodeList.at(index).second == true) {
+            letter += 128;
+        }
         unsigned int frequency = it->first.second;
-        bool onlyDaughter = it->second;
         outfile.write((char *)(&letter), sizeof(letter));
         outfile.write((char *)(&frequency), sizeof(frequency));
-        outfile.write((char *)(&onlyDaughter), sizeof(onlyDaughter));
     }
     outfile << "\n";
     for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
     {
-        bool terminal = it->second;
         unsigned int index = it->first;
-        outfile.write((char *)(&terminal), sizeof(terminal));
         outfile.write((char *)(&index), sizeof(index));
     }
 }
@@ -136,27 +155,47 @@ void CompactTrie::readFromFile(string fileName)
     infile.open(fileName, ios::in | ios::binary);
     unsigned char curr;
     infile.read((char *)(&curr), sizeof(curr));
+    vector<bool> terminality;
     while (curr != '\n')
     {
         unsigned char letter;
+        bool onlyDaughter = false;
         unsigned int frequency = 0;
-        bool onlyDaughter;
-        letter = curr;
+        letter = numToChar[int(curr)];
+        if(int(curr)>64) {
+            onlyDaughter = true;
+        }
+        if(int(curr)> 128) {
+            terminality.push_back(true);
+        }
+        else {
+            terminality.push_back(false);
+        }
         infile.read(reinterpret_cast<char *>(&curr), sizeof(int));
         frequency += curr;
-        infile.read(reinterpret_cast<char *>(&curr), sizeof(bool));
-        onlyDaughter = curr;
-        cout << letter << " " << frequency << " " << onlyDaughter << endl;
+        branchList.push_back(pair<pair<char,int>,bool>(pair<char,int>(letter, frequency), onlyDaughter));
         infile.read((char *)(&curr), sizeof(curr));
     }
-    cout << endl;
-    while (infile.read(reinterpret_cast<char *>(&curr), sizeof(bool)))
+    int i = 0;
+    while (infile.read(reinterpret_cast<char *>(&curr), sizeof(int)))
     {
-        bool terminal = curr;
         unsigned int index = 0;
-        infile.read(reinterpret_cast<char *>(&curr), sizeof(int));
         index += curr;
-        cout << terminal << " " << index << endl;
+        bool terminal = terminality[i];
+        i++;
+        nodeList.push_back(pair<int,bool>(index, terminal));
+    }
+}
+
+void CompactTrie::displayLists() {
+    for(auto it = branchList.begin(); it != branchList.end(); ++it)
+    {
+        cout << "(" << it->first.first << "," << it->second << ") ";
+    }
+    cout << endl;
+    for(auto it = nodeList.begin(); it != nodeList.end(); ++it)
+    {
+        cout << "(" << it->first << "," << it->second << ") ";       
     }
 }
 
@@ -164,5 +203,6 @@ int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
     compactTrie.writeToFile("compact.txt");
-    compactTrie.readFromFile("compact.txt");
+    CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
+    compactTrie2.displayLists();
 }

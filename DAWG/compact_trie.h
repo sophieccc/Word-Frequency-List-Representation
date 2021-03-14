@@ -16,12 +16,16 @@ public:
     void processNode(Node* n, bool lastBranch);
     void writeToFile(string fileName);
     void readFromFile(string fileName);
+    void createCode();
+    void displayLists();
 
 protected:
     int counter;
     vector<pair<pair<char,int>,bool>> branchList;
     vector<pair<int,bool>> nodeList;
     queue<Node*> nodes;
+    map<int,char> numToChar;
+    map<char,int> charToNum;
 };
 
 #endif // COMPACT_TRIE_H

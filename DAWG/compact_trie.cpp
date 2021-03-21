@@ -194,11 +194,11 @@ void CompactTrie::readFromFile(string fileName)
     for (int j = 0; j < listSize; j++)
     {
         infile.read((char *)(&curr), sizeof(curr));
-        bool onlyDaughter = false;
+        bool lastBranch = false;
         unsigned char letter = numToChar[int(curr)];
         if (int(curr) > 64)
         {
-            onlyDaughter = true;
+            lastBranch = true;
         }
         if (int(curr) > 128)
         {
@@ -210,7 +210,7 @@ void CompactTrie::readFromFile(string fileName)
         }
         infile.read((char *)(&curr), sizeof(char));
         unsigned int frequency = getIntegerVal(&infile, curr);
-        branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), onlyDaughter));
+        branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
     }
     int i = 0;
     while (infile.read((char *)(&curr), sizeof(char)))
@@ -265,6 +265,94 @@ void CompactTrie::displayLists()
     }
 }
 
+void CompactTrie::writeLexicon()
+{
+    vector<string> words;
+    getWords(&words, "", 0);
+    ofstream output_file("./results.txt");
+    for(int i=0; i < words.size(); i++)
+    {
+        output_file << words.at(i) << '\t' << getWordFrequency(words.at(i)) << endl;
+    }
+}
+
+void CompactTrie::getWords(vector<string> *words, string word, int index)
+{
+    bool lastBranch = false;
+    for (int ind = index; !lastBranch; ind++)
+    {
+        lastBranch = branchList[ind].second;
+        string tempWord = word + branchList[ind].first.first;
+        if (nodeList[ind].first==0)
+        {
+            words->push_back(tempWord);
+        }
+        else
+        {
+            if (nodeList[ind].second == true)
+            {
+                words->push_back(tempWord);
+            }
+            getWords(words, tempWord, nodeList[ind].first);
+        }
+    }
+}
+
+int CompactTrie::getWordFrequency(string word)
+{
+    int curr = 0;
+    int nodeFreq = getTotal(curr);
+    int dawgFreq = nodeFreq;
+    int currResult = 0;
+    int branchFreq = 0;
+    int terminalFreq = 0;
+    for (int i = 0; i < word.size(); i++)
+    {
+        curr = findLetter(curr, word[i]);
+        branchFreq = branchList[curr].first.second;
+        currResult += (branchFreq - nodeFreq);
+        nodeFreq = getTotal(nodeList[curr].first);
+        if (nodeList[curr].second == true && i != word.size() - 1)
+        {
+            terminalFreq += (nodeFreq - branchFreq);
+        }
+    }
+    currResult += terminalFreq;
+    if (nodeList[curr].first != 0)
+    {
+        currResult -= nodeFreq;
+    }
+    currResult += dawgFreq;
+    return currResult;
+}
+
+int CompactTrie::getTotal(int index)
+{
+    int total = 0;
+    bool lastBranch = false;
+    for (int ind = index; !lastBranch; ind++)
+    {
+        lastBranch = branchList[ind].second;
+        total += branchList[ind].first.second;
+    }
+    return total;
+}
+
+int CompactTrie::findLetter(int index, char letter)
+{
+    int branch = -1;
+    bool lastBranch = false;
+    for (int ind = index; !lastBranch; ind++)
+    {
+        if(branchList[ind].first.first == letter)
+        {
+            branch = ind;
+            lastBranch = true;
+        }
+    }
+    return branch;
+}
+
 int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
@@ -273,4 +361,5 @@ int main(int argc, char *argv[])
     compactTrie.writeToFile("compact.txt");
     CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
     compactTrie2.displayLists();
+    compactTrie2.writeLexicon();
 }

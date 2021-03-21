@@ -20,6 +20,11 @@ public:
     void readFromFile(string fileName);
     void createCode();
     void displayLists();
+    void writeLexicon();
+    void getWords(vector<string> *words, string word, int index);
+    int getWordFrequency(string word);
+    int getTotal(int index);
+    int findLetter(int index, char letter);
 
 protected:
     int counter;

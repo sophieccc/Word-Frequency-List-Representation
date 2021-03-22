@@ -26,7 +26,8 @@ public:
     int getWordFrequency(string word);
     int getTotal(int index);
     int findLetter(int index, char letter);
-
+    
+    set<char> alphabet;
 protected:
     int counter;
     vector<pair<pair<char, int>, bool>> branchList;
@@ -34,7 +35,6 @@ protected:
     queue<Node *> nodes;
     map<int, char> numToChar;
     map<char, int> charToNum;
-    set<char> alphabet;
 };
 
 #endif // COMPACT_TRIE_H

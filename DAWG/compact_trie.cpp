@@ -10,7 +10,6 @@ using namespace std;
 // Non-Compacted = Read word-freq list to first create pointer ver. of trie.
 CompactTrie::CompactTrie(string fileName, bool compacted)
 {
-    createCode();
     ifstream file;
     file.open(fileName, ios_base::in);
     if (compacted)
@@ -24,6 +23,7 @@ CompactTrie::CompactTrie(string fileName, bool compacted)
         trie.addLexicon(file);
         cout << "Lexicon Added." << endl;
         processTrie(trie);
+        createCode();
     }
 }
 
@@ -32,12 +32,12 @@ void CompactTrie::createCode()
     for (int i = 1; i <= 256; i += 64)
     {
         int index = i;
-        for (char l = 'a'; l <= 'z'; ++l)
+        for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
         {
-            numToChar[index] = l;
+            numToChar[index] = *it;
             if (i == 1)
             {
-                charToNum[l] = index;
+                charToNum[*it] = index;
             }
             index++;
         }
@@ -59,6 +59,10 @@ void CompactTrie::processTrie(Trie t)
                 last = true;
             }
             int freq = curr->branchFreqs.find(it->first)->second;
+            if(alphabet.find(it->first) == alphabet.end())
+            {
+                alphabet.insert(it->first);
+            }
             branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(it->first, freq), last));
             processNode(it->second, last);
         }
@@ -130,6 +134,12 @@ void CompactTrie::writeToFile(string fileName)
 {
     ofstream outfile;
     outfile.open(fileName, ios::out | ios::binary);
+    unsigned char alphabetSize = alphabet.size();
+    outfile.write((char *)(&alphabetSize), sizeof(alphabetSize));
+    for(auto it = alphabet.begin(); it != alphabet.end(); ++it)
+    {
+        outfile.write((char *)(&(*it)), sizeof(char));
+    }
     unsigned int listSize = branchList.size();
     outfile.write(reinterpret_cast<char *>(&listSize), sizeof(int));
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
@@ -187,6 +197,15 @@ void CompactTrie::readFromFile(string fileName)
 {
     std::ifstream infile;
     infile.open(fileName, ios::in | ios::binary);
+    unsigned char alphabetSize;
+    infile.read((char *)(&alphabetSize), sizeof(alphabetSize));
+    for(int i = 0; i < alphabetSize; i++)
+    {
+        unsigned char letter;
+        infile.read((char *)(&letter), sizeof(letter));
+        alphabet.insert(letter);
+    }
+    createCode();
     unsigned int listSize = 0;
     infile.read(reinterpret_cast<char *>(&listSize), sizeof(int));
     unsigned char curr;
@@ -196,7 +215,7 @@ void CompactTrie::readFromFile(string fileName)
         infile.read((char *)(&curr), sizeof(curr));
         bool lastBranch = false;
         unsigned char letter = numToChar[int(curr)];
-        if (int(curr) > 64)
+        if (int(curr) > 192 || (int(curr) > 64 && int(curr) < 129))
         {
             lastBranch = true;
         }
@@ -272,7 +291,7 @@ void CompactTrie::writeLexicon()
     ofstream output_file("./results.txt");
     for(int i=0; i < words.size(); i++)
     {
-        output_file << words.at(i) << '\t' << getWordFrequency(words.at(i)) << endl;
+        output_file << words.at(i) << endl;
     }
 }
 
@@ -315,6 +334,11 @@ int CompactTrie::getWordFrequency(string word)
         if (nodeList[curr].second == true && i != word.size() - 1)
         {
             terminalFreq += (nodeFreq - branchFreq);
+
+        }
+        if(i!=word.size() - 1)
+        {
+            curr = nodeList[curr].first;
         }
     }
     currResult += terminalFreq;
@@ -356,10 +380,7 @@ int CompactTrie::findLetter(int index, char letter)
 int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
-    compactTrie.displayLists();
-    cout << endl << endl;
     compactTrie.writeToFile("compact.txt");
     CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
-    compactTrie2.displayLists();
     compactTrie2.writeLexicon();
 }

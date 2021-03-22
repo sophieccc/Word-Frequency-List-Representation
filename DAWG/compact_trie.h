@@ -3,6 +3,7 @@
 
 #include "trie.h"
 #include <queue>
+#include <set>
 
 using namespace std;
 
@@ -33,6 +34,7 @@ protected:
     queue<Node *> nodes;
     map<int, char> numToChar;
     map<char, int> charToNum;
+    set<char> alphabet;
 };
 
 #endif // COMPACT_TRIE_H

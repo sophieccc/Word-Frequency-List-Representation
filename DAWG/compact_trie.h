@@ -16,9 +16,14 @@ public:
     void processTrie(Trie t);
     void processNode(Node *n, bool lastBranch);
     void writeToFile(string fileName);
-    void writeInteger(unsigned int index, ofstream *outfile);
-    int getIntegerVal(ifstream *infile, unsigned char curr);
+    void writeInteger(unsigned int index, ofstream *outfile, int queueMode);
+    int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode);
+    int origIntegerRead(ifstream *infile, unsigned char firstChar);
+    void origIntegerWrite(unsigned int index, ofstream *outfile);
+    int getIntegerMode(int listSize);
+    void readArrays(int listSize, int queueMode, int freqMode, ifstream *infile);
     void readFromFile(string fileName);
+    int getMaxFrequency();
     void createCode();
     void displayLists();
     void writeLexicon();

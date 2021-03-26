@@ -145,9 +145,12 @@ void CompactTrie::writeToFile(string fileName)
     int queueMode = getIntegerMode(listSize);
 
     unsigned int maxFreq = getMaxFrequency();
-    outfile.write(reinterpret_cast<char *>(&maxFreq), sizeof(maxFreq));
-    int freqMode = getIntegerMode(maxFreq);
-
+    unsigned int logMaxFreq = round((log(maxFreq) / log7) * 1000);
+    cout << maxFreq << " " << logMaxFreq << endl;
+    cout << getIntegerMode(maxFreq) << " " << getIntegerMode(logMaxFreq) << endl;
+    outfile.write(reinterpret_cast<char *>(&logMaxFreq), sizeof(int));
+    
+    int freqMode = getIntegerMode(logMaxFreq);
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
         unsigned char letter = charToNum.at(it->first.first);
@@ -162,12 +165,12 @@ void CompactTrie::writeToFile(string fileName)
         }
         outfile.write((char *)(&letter), sizeof(letter));
         unsigned int frequency = it->first.second;
-        writeInteger(frequency, &outfile, freqMode);
+        writeInteger(frequency, &outfile, freqMode, true);
     }
     for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
     {
         unsigned int index = it->first;
-        writeInteger(index, &outfile, queueMode);
+        writeInteger(index, &outfile, queueMode, false);
     }
 }
 void CompactTrie::origIntegerWrite(unsigned int index, ofstream *outfile)
@@ -197,7 +200,7 @@ void CompactTrie::origIntegerWrite(unsigned int index, ofstream *outfile)
         }
     }
 }
-void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode)
+void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
 {
     if(mode ==-1)
     {
@@ -205,6 +208,16 @@ void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode)
     }
     else
     {
+        if(logVals == true)
+        {
+            if(index<=0)
+            {
+                index = 1;
+            }
+            else {
+                index = round((log(index) / log7) * 1000);
+            }
+        }
         unsigned char firstChar = index % 256;
         outfile->write((char *)(&firstChar), sizeof(firstChar));
         if(mode >=2)
@@ -274,7 +287,7 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
             terminality.push_back(false);
         }
         infile->read((char *)(&curr), sizeof(char));
-        unsigned int frequency = getIntegerVal(infile, curr, freqMode);
+        unsigned int frequency = getIntegerVal(infile, curr, freqMode, true);
         branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
     }
     int i = 0;
@@ -282,7 +295,7 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
     {
         bool terminal = terminality[i];
         i++;
-        int index = getIntegerVal(infile, curr, queueMode);
+        int index = getIntegerVal(infile, curr, queueMode, false);
         nodeList.push_back(pair<int, bool>(index, terminal));
     }
 }
@@ -309,7 +322,7 @@ void CompactTrie::readFromFile(string fileName)
     readArrays(listSize, queueMode, freqMode, &infile);
 }
 
-int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode)
+int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
 {
     unsigned int index = 0;
     if(mode == -1)
@@ -328,7 +341,22 @@ int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mo
                 infile->read((char *)(&thirdChar), sizeof(thirdChar));  
             }
         }
-        index = firstChar + (secondChar * 256) + (256 * 256 * thirdChar);  
+        index = firstChar + (secondChar * 256) + (256 * 256 * thirdChar); 
+        if(logVals == true)
+        {
+            if(index == 0)
+            {
+                index = 1;
+            }
+            else if (index == 1)
+            {
+                index = 0;
+            }
+            else {
+                float z =  (float) index / (float) 1000;
+                index = round(pow(7, z));
+            }
+        }
     }
     return index;
 }
@@ -383,7 +411,7 @@ void CompactTrie::writeLexicon()
     ofstream output_file("./results.txt");
     for(int i=0; i < words.size(); i++)
     {
-        output_file << words.at(i) << "\t" << getWordFrequency(words.at(i)) << endl;
+        output_file << words.at(i) << endl;
     }
 }
 

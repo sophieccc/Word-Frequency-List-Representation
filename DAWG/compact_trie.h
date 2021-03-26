@@ -16,8 +16,8 @@ public:
     void processTrie(Trie t);
     void processNode(Node *n, bool lastBranch);
     void writeToFile(string fileName);
-    void writeInteger(unsigned int index, ofstream *outfile, int queueMode);
-    int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode);
+    void writeInteger(unsigned int index, ofstream *outfile, int queueMode, bool logVals);
+    int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals);
     int origIntegerRead(ifstream *infile, unsigned char firstChar);
     void origIntegerWrite(unsigned int index, ofstream *outfile);
     int getIntegerMode(int listSize);
@@ -40,6 +40,7 @@ protected:
     queue<Node *> nodes;
     map<int, char> numToChar;
     map<char, int> charToNum;
+    float log7 = log(7);
 };
 
 #endif // COMPACT_TRIE_H

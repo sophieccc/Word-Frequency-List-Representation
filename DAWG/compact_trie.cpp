@@ -27,23 +27,6 @@ CompactTrie::CompactTrie(string fileName, bool compacted)
     }
 }
 
-void CompactTrie::createCode()
-{
-    for (int i = 1; i <= 256; i += 64)
-    {
-        int index = i;
-        for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
-        {
-            numToChar[index] = *it;
-            if (i == 1)
-            {
-                charToNum[*it] = index;
-            }
-            index++;
-        }
-    }
-}
-
 void CompactTrie::processTrie(Trie t)
 {
     counter = t.rootNode->branches.size();
@@ -99,6 +82,23 @@ void CompactTrie::processNode(Node *n, bool last)
     }
 }
 
+void CompactTrie::createCode()
+{
+    for (int i = 1; i <= 256; i += 64)
+    {
+        int index = i;
+        for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
+        {
+            numToChar[index] = *it;
+            if (i == 1)
+            {
+                charToNum[*it] = index;
+            }
+            index++;
+        }
+    }
+}
+
 bool CompactTrie::doesWordExist(string word)
 {
     int index = 0;
@@ -128,265 +128,6 @@ bool CompactTrie::doesWordExist(string word)
         }
     }
     return nodeList[index].second;
-}
-
-void CompactTrie::writeToFile(string fileName)
-{
-    ofstream outfile;
-    outfile.open(fileName, ios::out | ios::binary);
-    unsigned char alphabetSize = alphabet.size();
-    outfile.write((char *)(&alphabetSize), sizeof(alphabetSize));
-    for(auto it = alphabet.begin(); it != alphabet.end(); ++it)
-    {
-        outfile.write((char *)(&(*it)), sizeof(char));
-    }
-    unsigned int listSize = branchList.size();
-    outfile.write(reinterpret_cast<char *>(&listSize), sizeof(int));
-    int queueMode = getIntegerMode(listSize);
-
-    unsigned int maxFreq = getMaxFrequency();
-    unsigned int logMaxFreq = round((log(maxFreq) / log7) * 1000);
-    cout << maxFreq << " " << logMaxFreq << endl;
-    cout << getIntegerMode(maxFreq) << " " << getIntegerMode(logMaxFreq) << endl;
-    outfile.write(reinterpret_cast<char *>(&logMaxFreq), sizeof(int));
-    
-    int freqMode = getIntegerMode(logMaxFreq);
-    for (auto it = branchList.begin(); it != branchList.end(); ++it)
-    {
-        unsigned char letter = charToNum.at(it->first.first);
-        if (it->second)
-        {
-            letter += 64;
-        }
-        int index = it - branchList.begin();
-        if (nodeList.at(index).second == true)
-        {
-            letter += 128;
-        }
-        outfile.write((char *)(&letter), sizeof(letter));
-        unsigned int frequency = it->first.second;
-        writeInteger(frequency, &outfile, freqMode, true);
-    }
-    for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
-    {
-        unsigned int index = it->first;
-        writeInteger(index, &outfile, queueMode, false);
-    }
-}
-void CompactTrie::origIntegerWrite(unsigned int index, ofstream *outfile)
-{
-    unsigned char curr;
-    if (index < 128)
-    {
-        curr = index;
-        outfile->write((char *)(&curr), sizeof(curr));
-    }
-    else
-    {
-        curr = ((index % 128) + 128);
-        outfile->write((char *)(&curr), sizeof(curr));
-        index /= 128;
-        if (index < 128)
-        {
-            curr = index;
-            outfile->write((char *)(&curr), sizeof(curr));
-        }
-        else
-        {
-            curr = ((index % 128) + 128);
-            outfile->write((char *)(&curr), sizeof(curr));
-            curr = (index / 128);
-            outfile->write((char *)(&curr), sizeof(curr));
-        }
-    }
-}
-void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
-{
-    if(mode ==-1)
-    {
-        origIntegerWrite(index, outfile);
-    }
-    else
-    {
-        if(logVals == true)
-        {
-            if(index<=0)
-            {
-                index = 1;
-            }
-            else {
-                index = round((log(index) / log7) * 1000);
-            }
-        }
-        unsigned char firstChar = index % 256;
-        outfile->write((char *)(&firstChar), sizeof(firstChar));
-        if(mode >=2)
-        {
-            unsigned char secondChar = index / 256;
-            outfile->write((char *)(&secondChar), sizeof(secondChar));
-            if(mode == 3)
-            {
-                unsigned char thirdChar = index / (256 * 256);
-                outfile->write((char *)(&thirdChar), sizeof(thirdChar));
-            }
-        }
-    }
-}
-
-int CompactTrie::getMaxFrequency()
-{
-    int maxFreq = 0;
-    for(auto it = branchList.begin(); it != branchList.end(); ++it)
-    {
-        int freq = it->first.second;
-        if(freq > maxFreq)
-        {
-            maxFreq = freq;
-        }
-    }
-    return maxFreq;
-}
-int CompactTrie::getIntegerMode(int listSize)
-{
-    if(listSize==-1)
-    {
-        return 0;
-    }
-    else if(listSize < 256)
-    {
-        return 1;
-    }
-    else if(listSize < 65536)
-    {
-        return 2;
-    }
-    else {
-        return 3;
-    }
-}
-
-void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream *infile)
-{
-    unsigned char curr;
-    vector<bool> terminality;
-    for (int j = 0; j < listSize; j++)
-    {
-        infile->read((char *)(&curr), sizeof(curr));
-        bool lastBranch = false;
-        unsigned char letter = numToChar[int(curr)];
-        if (int(curr) > 192 || (int(curr) > 64 && int(curr) < 129))
-        {
-            lastBranch = true;
-        }
-        if (int(curr) > 128)
-        {
-            terminality.push_back(true);
-        }
-        else
-        {
-            terminality.push_back(false);
-        }
-        infile->read((char *)(&curr), sizeof(char));
-        unsigned int frequency = getIntegerVal(infile, curr, freqMode, true);
-        branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
-    }
-    int i = 0;
-    while (infile->read((char *)(&curr), sizeof(char)))
-    {
-        bool terminal = terminality[i];
-        i++;
-        int index = getIntegerVal(infile, curr, queueMode, false);
-        nodeList.push_back(pair<int, bool>(index, terminal));
-    }
-}
-void CompactTrie::readFromFile(string fileName)
-{
-    std::ifstream infile;
-    infile.open(fileName, ios::in | ios::binary);
-    unsigned char alphabetSize;
-    infile.read((char *)(&alphabetSize), sizeof(alphabetSize));
-    for(int i = 0; i < alphabetSize; i++)
-    {
-        unsigned char letter;
-        infile.read((char *)(&letter), sizeof(letter));
-        alphabet.insert(letter);
-    }
-    createCode();
-    unsigned int listSize = 0;
-    infile.read(reinterpret_cast<char *>(&listSize), sizeof(int));
-    int queueMode = getIntegerMode(listSize);
-
-    unsigned int maxFreq = 0;
-    infile.read(reinterpret_cast<char *>(&maxFreq), sizeof(maxFreq));
-    int freqMode = getIntegerMode(maxFreq);
-    readArrays(listSize, queueMode, freqMode, &infile);
-}
-
-int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
-{
-    unsigned int index = 0;
-    if(mode == -1)
-    {
-        index = origIntegerRead(infile, firstChar);
-    }
-    else
-    {
-        unsigned char secondChar = 0;
-        unsigned char thirdChar = 0;
-        if(mode>=2)
-        {
-            infile->read((char *)(&secondChar), sizeof(secondChar));
-            if(mode==3)
-            {
-                infile->read((char *)(&thirdChar), sizeof(thirdChar));  
-            }
-        }
-        index = firstChar + (secondChar * 256) + (256 * 256 * thirdChar); 
-        if(logVals == true)
-        {
-            if(index == 0)
-            {
-                index = 1;
-            }
-            else if (index == 1)
-            {
-                index = 0;
-            }
-            else {
-                float z =  (float) index / (float) 1000;
-                index = round(pow(7, z));
-            }
-        }
-    }
-    return index;
-}
-
-int CompactTrie::origIntegerRead(ifstream *infile, unsigned char curr)
-{
-    int index = 0;
-    if (curr <= 127)
-    {
-        index += curr;
-    }
-    else
-    {
-        unsigned char secondChar;
-        unsigned char thirdChar;
-        int remainingBits = (int)pow(2, 14);
-        index += (curr - 128);
-        infile->read((char *)(&secondChar), sizeof(secondChar));
-        if (secondChar > 127)
-        {
-            index += ((secondChar - 128) * 128);
-            infile->read((char *)(&thirdChar), sizeof(thirdChar));
-            index += (thirdChar * remainingBits);
-        }
-        else
-        {
-            index += (secondChar * 128);
-        }
-    }
-    return index;
 }
 
 void CompactTrie::displayLists()
@@ -495,6 +236,268 @@ int CompactTrie::findLetter(int index, char letter)
         }
     }
     return branch;
+}
+
+void CompactTrie::writeToFile(string fileName)
+{
+    ofstream outfile;
+    outfile.open(fileName, ios::out | ios::binary);
+    unsigned char alphabetSize = alphabet.size();
+    outfile.write((char *)(&alphabetSize), sizeof(alphabetSize));
+    for(auto it = alphabet.begin(); it != alphabet.end(); ++it)
+    {
+        outfile.write((char *)(&(*it)), sizeof(char));
+    }
+    unsigned int listSize = branchList.size();
+    outfile.write(reinterpret_cast<char *>(&listSize), sizeof(int));
+    int queueMode = getIntegerMode(listSize);
+
+    unsigned int maxFreq = getMaxFrequency();
+    unsigned int logMaxFreq = round((log(maxFreq) / log7) * 1000);
+    cout << maxFreq << " " << logMaxFreq << endl;
+    cout << getIntegerMode(maxFreq) << " " << getIntegerMode(logMaxFreq) << endl;
+    outfile.write(reinterpret_cast<char *>(&logMaxFreq), sizeof(int));
+    
+    int freqMode = getIntegerMode(logMaxFreq);
+    for (auto it = branchList.begin(); it != branchList.end(); ++it)
+    {
+        unsigned char letter = charToNum.at(it->first.first);
+        if (it->second)
+        {
+            letter += 64;
+        }
+        int index = it - branchList.begin();
+        if (nodeList.at(index).second == true)
+        {
+            letter += 128;
+        }
+        outfile.write((char *)(&letter), sizeof(letter));
+        unsigned int frequency = it->first.second;
+        writeInteger(frequency, &outfile, freqMode, true);
+    }
+    for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
+    {
+        unsigned int index = it->first;
+        writeInteger(index, &outfile, queueMode, false);
+    }
+}
+
+int CompactTrie::getMaxFrequency()
+{
+    int maxFreq = 0;
+    for(auto it = branchList.begin(); it != branchList.end(); ++it)
+    {
+        int freq = it->first.second;
+        if(freq > maxFreq)
+        {
+            maxFreq = freq;
+        }
+    }
+    return maxFreq;
+}
+int CompactTrie::getIntegerMode(int listSize)
+{
+    if(listSize==-1)
+    {
+        return 0;
+    }
+    else if(listSize < 256)
+    {
+        return 1;
+    }
+    else if(listSize < 65536)
+    {
+        return 2;
+    }
+    else {
+        return 3;
+    }
+}
+
+void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
+{
+    if(mode ==-1)
+    {
+        origIntegerWrite(index, outfile);
+    }
+    else
+    {
+        if(logVals == true)
+        {
+            if(index<=0)
+            {
+                index = 1;
+            }
+            else {
+                index = round((log(index) / log7) * 1000);
+            }
+        }
+        unsigned char firstChar = index % 256;
+        outfile->write((char *)(&firstChar), sizeof(firstChar));
+        if(mode >=2)
+        {
+            unsigned char secondChar = index / 256;
+            outfile->write((char *)(&secondChar), sizeof(secondChar));
+            if(mode == 3)
+            {
+                unsigned char thirdChar = index / (256 * 256);
+                outfile->write((char *)(&thirdChar), sizeof(thirdChar));
+            }
+        }
+    }
+}
+
+void CompactTrie::origIntegerWrite(unsigned int index, ofstream *outfile)
+{
+    unsigned char curr;
+    if (index < 128)
+    {
+        curr = index;
+        outfile->write((char *)(&curr), sizeof(curr));
+    }
+    else
+    {
+        curr = ((index % 128) + 128);
+        outfile->write((char *)(&curr), sizeof(curr));
+        index /= 128;
+        if (index < 128)
+        {
+            curr = index;
+            outfile->write((char *)(&curr), sizeof(curr));
+        }
+        else
+        {
+            curr = ((index % 128) + 128);
+            outfile->write((char *)(&curr), sizeof(curr));
+            curr = (index / 128);
+            outfile->write((char *)(&curr), sizeof(curr));
+        }
+    }
+}
+
+void CompactTrie::readFromFile(string fileName)
+{
+    std::ifstream infile;
+    infile.open(fileName, ios::in | ios::binary);
+    unsigned char alphabetSize;
+    infile.read((char *)(&alphabetSize), sizeof(alphabetSize));
+    for(int i = 0; i < alphabetSize; i++)
+    {
+        unsigned char letter;
+        infile.read((char *)(&letter), sizeof(letter));
+        alphabet.insert(letter);
+    }
+    createCode();
+    unsigned int listSize = 0;
+    infile.read(reinterpret_cast<char *>(&listSize), sizeof(int));
+    int queueMode = getIntegerMode(listSize);
+
+    unsigned int maxFreq = 0;
+    infile.read(reinterpret_cast<char *>(&maxFreq), sizeof(maxFreq));
+    int freqMode = getIntegerMode(maxFreq);
+    readArrays(listSize, queueMode, freqMode, &infile);
+}
+
+void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream *infile)
+{
+    unsigned char curr;
+    vector<bool> terminality;
+    for (int j = 0; j < listSize; j++)
+    {
+        infile->read((char *)(&curr), sizeof(curr));
+        bool lastBranch = false;
+        unsigned char letter = numToChar[int(curr)];
+        if (int(curr) > 192 || (int(curr) > 64 && int(curr) < 129))
+        {
+            lastBranch = true;
+        }
+        if (int(curr) > 128)
+        {
+            terminality.push_back(true);
+        }
+        else
+        {
+            terminality.push_back(false);
+        }
+        infile->read((char *)(&curr), sizeof(char));
+        unsigned int frequency = getIntegerVal(infile, curr, freqMode, true);
+        branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
+    }
+    int i = 0;
+    while (infile->read((char *)(&curr), sizeof(char)))
+    {
+        bool terminal = terminality[i];
+        i++;
+        int index = getIntegerVal(infile, curr, queueMode, false);
+        nodeList.push_back(pair<int, bool>(index, terminal));
+    }
+}
+
+int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
+{
+    unsigned int index = 0;
+    if(mode == -1)
+    {
+        index = origIntegerRead(infile, firstChar);
+    }
+    else
+    {
+        unsigned char secondChar = 0;
+        unsigned char thirdChar = 0;
+        if(mode>=2)
+        {
+            infile->read((char *)(&secondChar), sizeof(secondChar));
+            if(mode==3)
+            {
+                infile->read((char *)(&thirdChar), sizeof(thirdChar));  
+            }
+        }
+        index = firstChar + (secondChar * 256) + (256 * 256 * thirdChar); 
+        if(logVals == true)
+        {
+            if(index == 0)
+            {
+                index = 1;
+            }
+            else if (index == 1)
+            {
+                index = 0;
+            }
+            else {
+                float z =  (float) index / (float) 1000;
+                index = round(pow(7, z));
+            }
+        }
+    }
+    return index;
+}
+
+int CompactTrie::origIntegerRead(ifstream *infile, unsigned char curr)
+{
+    int index = 0;
+    if (curr <= 127)
+    {
+        index += curr;
+    }
+    else
+    {
+        unsigned char secondChar;
+        unsigned char thirdChar;
+        int remainingBits = (int)pow(2, 14);
+        index += (curr - 128);
+        infile->read((char *)(&secondChar), sizeof(secondChar));
+        if (secondChar > 127)
+        {
+            index += ((secondChar - 128) * 128);
+            infile->read((char *)(&thirdChar), sizeof(thirdChar));
+            index += (thirdChar * remainingBits);
+        }
+        else
+        {
+            index += (secondChar * 128);
+        }
+    }
+    return index;
 }
 
 int main(int argc, char *argv[])

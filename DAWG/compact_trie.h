@@ -25,13 +25,16 @@ public:
 
     void writeToFile(string fileName);
     int getMaxFrequency();
+    void setMinLogBase(int maxFreq);
     int getIntegerMode(int listSize);
     void writeInteger(unsigned int index, ofstream *outfile, int queueMode, bool logVals);
     void origIntegerWrite(unsigned int index, ofstream *outfile);
+    void oneOrTwoBytesWrite(unsigned int index, ofstream *outfile);
     void readFromFile(string fileName);
     void readArrays(int listSize, int queueMode, int freqMode, ifstream *infile);
     int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals);
     int origIntegerRead(ifstream *infile, unsigned char firstChar);
+    int oneOrTwoBytesRead(ifstream *infile, unsigned char firstChar);
 
     set<char> alphabet;
 
@@ -42,7 +45,8 @@ protected:
     queue<Node *> nodes;
     map<int, char> numToChar;
     map<char, int> charToNum;
-    float log7 = log(7);
+    int multiplier = 10;
+    int logBase = 2;
 };
 
 #endif // COMPACT_TRIE_H

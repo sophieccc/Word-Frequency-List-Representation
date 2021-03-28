@@ -30,11 +30,13 @@ public:
     void writeInteger(unsigned int index, ofstream *outfile, int queueMode, bool logVals);
     void origIntegerWrite(unsigned int index, ofstream *outfile);
     void oneOrTwoBytesWrite(unsigned int index, ofstream *outfile);
+    void twoOrThreeBytesWrite(unsigned int index, ofstream *outfile);
     void readFromFile(string fileName);
     void readArrays(int listSize, int queueMode, int freqMode, ifstream *infile);
     int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals);
     int origIntegerRead(ifstream *infile, unsigned char firstChar);
     int oneOrTwoBytesRead(ifstream *infile, unsigned char firstChar);
+    int twoOrThreeBytesRead(ifstream *infile, unsigned char firstChar);
 
     set<char> alphabet;
 
@@ -45,7 +47,7 @@ protected:
     queue<Node *> nodes;
     map<int, char> numToChar;
     map<char, int> charToNum;
-    int multiplier = 10;
+    int multiplier = 1000;
     int logBase = 2;
 };
 

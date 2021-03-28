@@ -42,7 +42,7 @@ void CompactTrie::processTrie(Trie t)
                 last = true;
             }
             int freq = curr->branchFreqs.find(it->first)->second;
-            if(alphabet.find(it->first) == alphabet.end())
+            if (alphabet.find(it->first) == alphabet.end())
             {
                 alphabet.insert(it->first);
             }
@@ -150,7 +150,7 @@ void CompactTrie::writeLexicon()
     vector<string> words;
     getWords(&words, "", 0);
     ofstream output_file("./results.txt");
-    for(int i=0; i < words.size(); i++)
+    for (int i = 0; i < words.size(); i++)
     {
         output_file << words.at(i) << endl;
     }
@@ -163,7 +163,7 @@ void CompactTrie::getWords(vector<string> *words, string word, int index)
     {
         lastBranch = branchList[ind].second;
         string tempWord = word + branchList[ind].first.first;
-        if (nodeList[ind].first==0)
+        if (nodeList[ind].first == 0)
         {
             words->push_back(tempWord);
         }
@@ -195,9 +195,8 @@ int CompactTrie::getWordFrequency(string word)
         if (nodeList[curr].second == true && i != word.size() - 1)
         {
             terminalFreq += (nodeFreq - branchFreq);
-
         }
-        if(i!=word.size() - 1)
+        if (i != word.size() - 1)
         {
             curr = nodeList[curr].first;
         }
@@ -229,7 +228,7 @@ int CompactTrie::findLetter(int index, char letter)
     bool lastBranch = false;
     for (int ind = index; !lastBranch; ind++)
     {
-        if(branchList[ind].first.first == letter)
+        if (branchList[ind].first.first == letter)
         {
             branch = ind;
             lastBranch = true;
@@ -248,7 +247,7 @@ void CompactTrie::writeToFile(string fileName)
     outfile.open(fileName, ios::out | ios::binary);
     unsigned char alphabetSize = alphabet.size();
     outfile.write((char *)(&alphabetSize), sizeof(alphabetSize));
-    for(auto it = alphabet.begin(); it != alphabet.end(); ++it)
+    for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
     {
         outfile.write((char *)(&(*it)), sizeof(char));
     }
@@ -261,7 +260,7 @@ void CompactTrie::writeToFile(string fileName)
     unsigned int logMaxFreq = round((log(maxFreq) / log(logBase)) * multiplier);
     outfile.write(reinterpret_cast<char *>(&logBase), sizeof(int));
     outfile.write(reinterpret_cast<char *>(&logMaxFreq), sizeof(int));
-    
+
     int freqMode = getIntegerMode(logMaxFreq);
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
@@ -289,10 +288,10 @@ void CompactTrie::writeToFile(string fileName)
 int CompactTrie::getMaxFrequency()
 {
     int maxFreq = 0;
-    for(auto it = branchList.begin(); it != branchList.end(); ++it)
+    for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
         int freq = it->first.second;
-        if(freq > maxFreq)
+        if (freq > maxFreq)
         {
             maxFreq = freq;
         }
@@ -302,11 +301,11 @@ int CompactTrie::getMaxFrequency()
 
 void CompactTrie::setMinLogBase(int maxFreq)
 {
-    float divisor = (float) multiplier / 100.0;
+    float divisor = (float)multiplier / 100.0;
     float maxLog = log(maxFreq) / log(logBase);
-    float difference = (5.0/ (float) multiplier);
-    float limit = ((float) multiplier/divisor - difference) / 10;
-    while(maxLog >= limit && logBase < 20)
+    float difference = (5.0 / (float)multiplier);
+    float limit = ((float)multiplier / divisor - difference) / 10;
+    while (maxLog >= limit && logBase < 20)
     {
         logBase++;
         maxLog = log(maxFreq) / log(logBase);
@@ -315,60 +314,66 @@ void CompactTrie::setMinLogBase(int maxFreq)
 
 int CompactTrie::getIntegerMode(int listSize)
 {
-    if(listSize==-1)
-    {
-        return 0;
-    }
-    else if(listSize < 256)
+    if (listSize < 256)
     {
         return 2;
     }
-    else if(listSize < 32768)
+    else if (listSize < 32768)
     {
         return 1;
     }
-    else if(listSize < 65536)
+    else if (listSize < 65536)
     {
         return 3;
     }
-    else {
+    else if (listSize < 4194304)
+    {
+        return -1;
+    }
+    else if (listSize < 8388608)
+    {
+        return 0;
+    }
+    else
+    {
         return 4;
     }
 }
 
 void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
 {
-    if(mode == -1)
+    if (logVals == true)
+    {
+        if (index <= 0)
+        {
+            index = 1;
+        }
+        index = round((log(index) / log(logBase)) * (double)multiplier);
+    }
+    if (mode == -1)
     {
         origIntegerWrite(index, outfile);
     }
+    else if (mode == 1)
+    {
+        oneOrTwoBytesWrite(index, outfile);
+    }
+    else if( mode ==0)
+    {
+        twoOrThreeBytesWrite(index, outfile);
+    }
     else
     {
-        if(logVals == true)
+        unsigned char firstChar = index % 256;
+        outfile->write((char *)(&firstChar), sizeof(firstChar));
+        if (mode >= 3)
         {
-            if(index<=0)
+            unsigned char secondChar = index / 256;
+            outfile->write((char *)(&secondChar), sizeof(secondChar));
+            if (mode == 4)
             {
-                index = 1;
-            }
-            index = round((log(index) / log(logBase)) * (double) multiplier);
-        }
-        if (mode == 1)
-        {
-           oneOrTwoBytesWrite(index, outfile); 
-        }
-        else 
-        {
-            unsigned char firstChar = index % 256;
-            outfile->write((char *)(&firstChar), sizeof(firstChar));
-            if(mode >=3)
-            {
-                unsigned char secondChar = index / 256;
-                outfile->write((char *)(&secondChar), sizeof(secondChar));
-                if(mode == 4)
-                {
-                    unsigned char thirdChar = index / (256 * 256);
-                    outfile->write((char *)(&thirdChar), sizeof(thirdChar));
-                }
+                unsigned char thirdChar = index / (256 * 256);
+                outfile->write((char *)(&thirdChar), sizeof(thirdChar));
             }
         }
     }
@@ -420,13 +425,37 @@ void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
     }
 }
 
+void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
+{
+    unsigned char firstChar = ((index % 256) + 256);
+    cout << int(firstChar) << endl;
+    outfile->write((char *)(&firstChar), sizeof(firstChar));
+    index /= 256;
+    unsigned char secondChar;
+    if (index < 128)
+    {
+        secondChar = index;
+        cout << "two " << int(secondChar) << endl;
+        outfile->write((char *)(&secondChar), sizeof(secondChar));
+    }
+    else
+    {
+        secondChar = (index % 256) + 256;
+        cout << "three " << int(secondChar) << endl;
+        outfile->write((char *)(&secondChar), sizeof(secondChar));
+        unsigned char thirdChar = index / 128;
+        cout << int(thirdChar) << endl;
+        outfile->write((char *)(&thirdChar), sizeof(thirdChar));
+    }
+}
+
 void CompactTrie::readFromFile(string fileName)
 {
     std::ifstream infile;
     infile.open(fileName, ios::in | ios::binary);
     unsigned char alphabetSize;
     infile.read((char *)(&alphabetSize), sizeof(alphabetSize));
-    for(int i = 0; i < alphabetSize; i++)
+    for (int i = 0; i < alphabetSize; i++)
     {
         unsigned char letter;
         infile.read((char *)(&letter), sizeof(letter));
@@ -482,39 +511,42 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
 int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
 {
     unsigned int index = 0;
-    if(mode == -1)
+    if (mode == -1)
     {
         index = origIntegerRead(infile, firstChar);
     }
+    else if (mode == 1)
+    {
+        index = oneOrTwoBytesRead(infile, firstChar);
+    }
+    else if (mode ==0)
+    {
+        index = twoOrThreeBytesRead(infile, firstChar);
+    }
     else
     {
-        if(mode == 1)
+        unsigned char secondChar = 0;
+        unsigned char thirdChar = 0;
+        if (mode >= 3)
         {
-            index = oneOrTwoBytesRead(infile, firstChar);
-        }
-        else {
-            unsigned char secondChar = 0;
-            unsigned char thirdChar = 0;
-            if(mode>=3)
+            infile->read((char *)(&secondChar), sizeof(secondChar));
+            if (mode == 4)
             {
-                infile->read((char *)(&secondChar), sizeof(secondChar));
-                if(mode==4)
-                {
-                    infile->read((char *)(&thirdChar), sizeof(thirdChar));  
-                }
+                infile->read((char *)(&thirdChar), sizeof(thirdChar));
             }
-            index = firstChar + (secondChar * 256) + (256 * 256 * thirdChar); 
         }
-        if(logVals == true)
+        index = firstChar + (secondChar * 256) + (256 * 256 * thirdChar);
+    }
+    if (logVals == true)
+    {
+        if (index == 0)
         {
-            if(index == 0)
-            {
-                index = 1;
-            }
-            else {
-                float z =  (float) index / (float) multiplier;
-                index = round(pow(logBase, z));
-            }
+            index = 1;
+        }
+        else
+        {
+            float z = (float)index / (float)multiplier;
+            index = round(pow(logBase, z));
         }
     }
     return index;
@@ -565,11 +597,31 @@ int CompactTrie::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
     return index;
 }
 
+int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
+{
+    int index = curr;
+    unsigned char secondChar;
+    unsigned char thirdChar;
+    int remainingBits = (int)pow(2, 15);
+
+    infile->read((char *)(&secondChar), sizeof(secondChar));
+    if (secondChar > 127)
+    {
+        index += ((secondChar - 128) * 256);
+        infile->read((char *)(&thirdChar), sizeof(thirdChar));
+        index += (thirdChar * remainingBits);
+    }
+    else
+    {
+        index += (secondChar * 256);
+    }
+    return index;
+}
+
 int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
     compactTrie.writeToFile("compact.txt");
     CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
     compactTrie2.writeLexicon();
-    compactTrie2.displayLists();
 }

@@ -273,14 +273,20 @@ double CompactTrie::getWordProbability(string word)
 
 void CompactTrie::writeWordProbas(string inputFile, string outputFile)
 {
-    ifstream file;
-    file.open(inputFile, ios_base::in);
+    ifstream infile;
+    infile.open(inputFile, ios_base::in);
+    ofstream outfile;
+    outfile.open(outputFile, ios::out);
     string line;
-    while (getline(file, line))
+    while (getline(infile, line))
     {
         int split = line.find(" ");
         string word = line.substr(0, split);
+        double proba = getWordProbability(word);
+        outfile << proba << "\n";
     }
+    infile.close();
+    outfile.close();
 }
 
 /* *
@@ -669,7 +675,10 @@ int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
 int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
-    compactTrie.writeToFile("compact.txt", false);
+    compactTrie.writeToFile("compact.txt", true);
+    compactTrie.writeWordProbas(argv[1], "orig.txt");
     CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
     compactTrie2.writeLexicon();
+    compactTrie2.writeWordProbas(argv[1], "new.txt");
+
 }

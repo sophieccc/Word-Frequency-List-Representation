@@ -23,8 +23,9 @@ public:
     int getTotal(int index);
     int findLetter(int index, char letter);
     double getWordProbability(string word);
+    void writeWordProbas(string inputFile, string outputFile);
 
-    void writeToFile(string fileName);
+    void writeToFile(string fileName, bool useLogs);
     int getMaxFrequency();
     void setMinLogBase(int maxFreq);
     int getIntegerMode(int listSize);
@@ -33,7 +34,7 @@ public:
     void oneOrTwoBytesWrite(unsigned int index, ofstream *outfile);
     void twoOrThreeBytesWrite(unsigned int index, ofstream *outfile);
     void readFromFile(string fileName);
-    void readArrays(int listSize, int queueMode, int freqMode, ifstream *infile);
+    void readArrays(int listSize, int queueMode, int freqMode, ifstream *infile, bool useLogs);
     int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals);
     int origIntegerRead(ifstream *infile, unsigned char firstChar);
     int oneOrTwoBytesRead(ifstream *infile, unsigned char firstChar);

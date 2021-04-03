@@ -237,6 +237,40 @@ int CompactTrie::findLetter(int index, char letter)
     return branch;
 }
 
+
+double CompactTrie::getWordProbability(string word)
+{
+    if(doesWordExist(word))
+    {
+        double proba = 1.0;
+        int index = 0;
+        for (int i=0; i < word.size(); i++)
+        {
+            // Get total frequency of the parent node.
+            double total = getTotal(index);
+            bool foundChar = false;
+            while(!foundChar)
+            {
+                if (branchList[index].first.first == word[i])
+                {
+                    // Current branch's frequency divided by node frequency.
+                    proba *= ((double) branchList[index].first.second) / total;
+                    index = nodeList[index].first;
+                    foundChar = true;
+                }
+                else
+                {
+                    index++;
+                }
+            }
+        }
+        return proba;
+    }
+    else {
+        return 0;
+    }
+}
+
 /* *
 FILE I/O SECTION
 *  */

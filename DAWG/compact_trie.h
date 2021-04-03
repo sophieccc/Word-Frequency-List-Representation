@@ -22,6 +22,7 @@ public:
     int getWordFrequency(string word);
     int getTotal(int index);
     int findLetter(int index, char letter);
+    double getWordProbability(string word);
 
     void writeToFile(string fileName);
     int getMaxFrequency();

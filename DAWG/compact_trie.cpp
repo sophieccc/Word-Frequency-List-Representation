@@ -306,14 +306,13 @@ void CompactTrie::writeToFile(string fileName, bool useLogs)
     unsigned int listSize = branchList.size();
     outfile.write(reinterpret_cast<char *>(&listSize), sizeof(int));
     int queueMode = getIntegerMode(listSize);
-
     unsigned int maxFreq = getMaxFrequency();
     setMinLogBase(maxFreq);
+    outfile.write(reinterpret_cast<char *>(&useLogs), sizeof(char));
     if(useLogs)
     {
         maxFreq = round((log(maxFreq) / log(logBase)) * multiplier);
     }
-    outfile.write(reinterpret_cast<char *>(&useLogs), sizeof(bool));
     outfile.write(reinterpret_cast<char *>(&logBase), sizeof(int));
     outfile.write(reinterpret_cast<char *>(&maxFreq), sizeof(int));
 
@@ -390,9 +389,12 @@ int CompactTrie::getIntegerMode(int listSize)
     {
         return 0;
     }
-    else
+    else if (listSize < 16777216)
     {
         return 4;
+    }
+    else {
+        return 5;
     }
 }
 
@@ -414,9 +416,13 @@ void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, 
     {
         oneOrTwoBytesWrite(index, outfile);
     }
-    else if( mode ==0)
+    else if(mode ==0)
     {
         twoOrThreeBytesWrite(index, outfile);
+    }
+    else if(mode == 5)
+    {
+        outfile->write((char *)(&index), sizeof(int));   
     }
     else
     {
@@ -520,10 +526,15 @@ void CompactTrie::readFromFile(string fileName)
     bool useLogs = false;
     infile.read(reinterpret_cast<char *>(&useLogs), sizeof(bool));
     infile.read(reinterpret_cast<char *>(&logBase), sizeof(int));
-
     unsigned int maxFreq = 0;
     infile.read(reinterpret_cast<char *>(&maxFreq), sizeof(maxFreq));
     int freqMode = getIntegerMode(maxFreq);
+    cout << "listSize: " << listSize << endl;
+    cout << "queueMode: " << queueMode << endl;
+    cout << "useLogs: " << useLogs << endl;
+    cout << "logBase: " << logBase << endl;
+    cout << "'maxFreq': " << maxFreq << endl;
+    cout << "'freqMode': " << freqMode << endl;
     readArrays(listSize, queueMode, freqMode, &infile, useLogs);
 }
 
@@ -548,8 +559,15 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
         {
             terminality.push_back(false);
         }
-        infile->read((char *)(&curr), sizeof(char));
-        unsigned int frequency = getIntegerVal(infile, curr, freqMode, useLogs);
+        unsigned int frequency;
+        if(freqMode == 5)
+        {
+            infile->read((char *)(&frequency), sizeof(int));
+        }
+        else {
+            infile->read((char *)(&curr), sizeof(char));
+            frequency = getIntegerVal(infile, curr, freqMode, useLogs);
+        }
         branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
     }
     int i = 0;
@@ -557,7 +575,15 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
     {
         bool terminal = terminality[i];
         i++;
-        int index = getIntegerVal(infile, curr, queueMode, false);
+        int index;
+        if(queueMode == 5)
+        {
+            infile->read((char *)(&index), sizeof(int));
+        } 
+        else 
+        {
+            index = getIntegerVal(infile, curr, queueMode, false);
+        }
         nodeList.push_back(pair<int, bool>(index, terminal));
     }
 }
@@ -573,7 +599,7 @@ int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mo
     {
         index = oneOrTwoBytesRead(infile, firstChar);
     }
-    else if (mode ==0)
+    else if (mode == 0)
     {
         index = twoOrThreeBytesRead(infile, firstChar);
     }
@@ -676,9 +702,9 @@ int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
     compactTrie.writeToFile("compact.txt", true);
-    compactTrie.writeWordProbas(argv[1], "orig.txt");
-    CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
+    //compactTrie.writeWordProbas(argv[1], "orig_orig.txt");
+    CompactTrie compactTrie2 = CompactTrie("compact_orig.txt", true);
     compactTrie2.writeLexicon();
-    compactTrie2.writeWordProbas(argv[1], "new.txt");
+    //compactTrie2.writeWordProbas(argv[1], "new.txt");
 
 }

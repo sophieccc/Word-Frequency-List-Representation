@@ -669,8 +669,6 @@ int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
     compactTrie.writeToFile("compact.txt", true);
-    //compactTrie.writeWordProbas(argv[1], "orig_orig.txt");
     CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
     compactTrie2.writeLexicon();
-    //compactTrie2.writeWordProbas(argv[1], "new.txt");
 }

@@ -303,6 +303,8 @@ void CompactTrie::writeToFile(string fileName, bool useLogs)
     outfile.write(reinterpret_cast<char *>(&logBase), sizeof(int));
     outfile.write(reinterpret_cast<char *>(&maxFreq), sizeof(int));
     int freqMode = getIntegerMode(maxFreq);
+    cout << maxFreq << " " << freqMode << endl;
+    cout << branchList.size() << endl;
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
         unsigned char letter = charToNum.at(it->first.first);
@@ -668,7 +670,7 @@ int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
 int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);
-    compactTrie.writeToFile("compact.txt", true);
+    compactTrie.writeToFile("compact.txt", false);
     CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
     compactTrie2.writeLexicon();
 }

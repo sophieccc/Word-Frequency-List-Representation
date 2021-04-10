@@ -483,6 +483,10 @@ void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
     else
     {
         secondChar = (index % 256) + 256;
+        if(secondChar < 128)
+        {
+            secondChar +=128;
+        }
         outfile->write((char *)(&secondChar), sizeof(secondChar));
         unsigned char thirdChar = index / 128;
         outfile->write((char *)(&thirdChar), sizeof(thirdChar));
@@ -510,6 +514,7 @@ void CompactTrie::readFromFile(string fileName)
     unsigned int maxFreq = 0;
     infile.read(reinterpret_cast<char *>(&maxFreq), sizeof(maxFreq));
     int freqMode = getIntegerMode(maxFreq);
+    cout << queueMode << " " << freqMode << endl;
     readArrays(listSize, queueMode, freqMode, &infile, useLogs);
 }
 void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream *infile, bool useLogs)
@@ -546,20 +551,24 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
         branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
     }
     int i = 0;
-    while (infile->read((char *)(&curr), sizeof(char)))
+    int index = 0;
+    if (queueMode == 5)
     {
-        bool terminal = terminality[i];
-        i++;
-        int index;
-        if (queueMode == 5)
+        while (infile->read((char *)(&index), sizeof(int)))
         {
-            infile->read((char *)(&index), sizeof(int));
+            bool terminal = terminality[i];
+            i++;
+            nodeList.push_back(pair<int, bool>(index, terminal));
         }
-        else
+    }
+    else {
+        while (infile->read((char *)(&curr), sizeof(char)))
         {
+            bool terminal = terminality[i];
+            i++;
             index = getIntegerVal(infile, curr, queueMode, false);
+            nodeList.push_back(pair<int, bool>(index, terminal));
         }
-        nodeList.push_back(pair<int, bool>(index, terminal));
     }
 }
 int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)

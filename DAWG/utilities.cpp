@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctype.h>
+#include <algorithm>
 #include "trie.h"
 #include "compact_trie.h"
 
@@ -65,7 +66,7 @@ void cleanFile(string filename)
         string word = line.substr(0, split);
         bool allowed = true;
         for(int i = 0; i < word.size() && allowed; ++i) {
-            if(!(isalpha(word[i]) || word[i]=='\'' || word[i]=='-'))
+            if(!(isalpha(word[i]) /*|| word[i]=='\'' || word[i]=='-'*/))
             {
                 allowed = false;
             }
@@ -77,12 +78,30 @@ void cleanFile(string filename)
     }
 }
 
+void changeAlpha(string filename)
+{
+    ifstream file2;
+    file2.open(filename, ios_base::in);
+    string line;
+    ofstream output_file("./Tests/alpha/no_ni.txt");
+    while (getline(file2, line))
+    {
+        int split = line.find(" ");
+        string word = line.substr(0, split);
+        int freq = stoi(line.substr(split));
+        replace( word.begin(), word.end(), 'n', 'm');
+        replace( word.begin(), word.end(), 'i', 'e');
+        output_file << word << " " << freq << endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     string filename = argv[1];
-    CompactTrie compactTrie = CompactTrie(filename, false);
-    int n = 1988;
+    //CompactTrie compactTrie = CompactTrie(filename, false);
     //storeInfo(compactTrie, filename);
+    //int n = 56240;
     //storeLexiconSubset(n, filename);
     //cleanFile(filename);
+    //changeAlpha(filename);
 }

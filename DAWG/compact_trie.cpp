@@ -676,6 +676,7 @@ int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
     }
     return index;
 }
+
 int main(int argc, char *argv[])
 {
     CompactTrie compactTrie = CompactTrie(argv[1], false);

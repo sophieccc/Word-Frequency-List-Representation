@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <ctype.h>
 #include "trie.h"
 #include "compact_trie.h"
 
@@ -50,11 +51,38 @@ void storeLexiconSubset(int n, string filename)
         count++;
     }
 }
+
+void cleanFile(string filename)
+{
+    ifstream file2;
+    file2.open(filename, ios_base::in);
+    string line;
+    int count = 1;
+    ofstream output_file("./cleaned.txt");
+    while (getline(file2, line))
+    {
+        int split = line.find(" ");
+        string word = line.substr(0, split);
+        bool allowed = true;
+        for(int i = 0; i < word.size() && allowed; ++i) {
+            if(!(isalpha(word[i]) || word[i]=='\'' || word[i]=='-'))
+            {
+                allowed = false;
+            }
+        }
+        if(allowed)
+        {
+            output_file << line << endl;
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     string filename = argv[1];
     CompactTrie compactTrie = CompactTrie(filename, false);
-    //storeInfo(compactTrie, filename);
     int n = 1988;
-    storeLexiconSubset(n, filename);
+    //storeInfo(compactTrie, filename);
+    //storeLexiconSubset(n, filename);
+    //cleanFile(filename);
 }

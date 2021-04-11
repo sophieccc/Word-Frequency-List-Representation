@@ -483,9 +483,9 @@ void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
     else
     {
         secondChar = (index % 256) + 256;
-        if(secondChar < 128)
+        if (secondChar < 128)
         {
-            secondChar +=128;
+            secondChar += 128;
         }
         outfile->write((char *)(&secondChar), sizeof(secondChar));
         unsigned char thirdChar = index / 128;
@@ -561,7 +561,8 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
             nodeList.push_back(pair<int, bool>(index, terminal));
         }
     }
-    else {
+    else
+    {
         while (infile->read((char *)(&curr), sizeof(char)))
         {
             bool terminal = terminality[i];

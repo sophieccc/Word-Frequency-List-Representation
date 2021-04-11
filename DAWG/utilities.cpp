@@ -21,12 +21,12 @@ void storeInfo(CompactTrie compactTrie, string filename)
         numWords++;
         int split = line.find(" ");
         string word = line.substr(0, split);
-        if(word.size() > maxWordLength)
+        if (word.size() > maxWordLength)
         {
             maxWordLength = word.size();
         }
         int freq = stoi(line.substr(split));
-        if(freq > maxFreq)
+        if (freq > maxFreq)
         {
             maxFreq = freq;
         }
@@ -45,7 +45,7 @@ void storeLexiconSubset(int n, string filename)
     ofstream output_file("./subset.txt");
     while (getline(file2, line))
     {
-        if(count % n == 0)
+        if (count % n == 0)
         {
             output_file << line << endl;
         }
@@ -65,13 +65,14 @@ void cleanFile(string filename)
         int split = line.find(" ");
         string word = line.substr(0, split);
         bool allowed = true;
-        for(int i = 0; i < word.size() && allowed; ++i) {
-            if(!(isalpha(word[i]) /*|| word[i]=='\'' || word[i]=='-'*/))
+        for (int i = 0; i < word.size() && allowed; ++i)
+        {
+            if (!(isalpha(word[i]) /*|| word[i]=='\'' || word[i]=='-'*/))
             {
                 allowed = false;
             }
         }
-        if(allowed)
+        if (allowed)
         {
             output_file << line << endl;
         }
@@ -89,8 +90,8 @@ void changeAlpha(string filename)
         int split = line.find(" ");
         string word = line.substr(0, split);
         int freq = stoi(line.substr(split));
-        replace( word.begin(), word.end(), 'n', 'm');
-        replace( word.begin(), word.end(), 'i', 'e');
+        replace(word.begin(), word.end(), 'n', 'm');
+        replace(word.begin(), word.end(), 'i', 'e');
         output_file << word << " " << freq << endl;
     }
 }

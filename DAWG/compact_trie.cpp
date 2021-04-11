@@ -564,7 +564,7 @@ void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
     }
 }
 
-// reads the compacted trie in from a file and constructs it.
+// Reads the compacted trie in from a file and constructs it.
 void CompactTrie::readFromFile(string fileName)
 {
     std::ifstream infile;

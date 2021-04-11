@@ -3,12 +3,16 @@
 
 using namespace std;
 
+// Determines equality of two nodes. 
+// In this case, it is equivalence (same branches and both terminal).
 bool Node::operator==(const Node &t) const
 {
     bool eqTerminal = this->terminal == t.terminal;
     bool eqBranches = equal(this->branches.begin(), this->branches.end(), t.branches.begin());
     return eqTerminal && eqBranches;
 }
+
+// Checks if a given word exists in the current node's trie.
 Node *Node::hasWord(string word)
 {
     Node *current = this;
@@ -19,6 +23,7 @@ Node *Node::hasWord(string word)
     return current;
 }
 
+// Checks if the node has a branch labelled with the given letter.
 Node *Node::hasLetter(char letter)
 {
     Node *nextNode = NULL;
@@ -30,6 +35,8 @@ Node *Node::hasLetter(char letter)
     return nextNode;
 }
 
+// If a branch with the given letter does not exist, creates a new one.
+// Otherwise, adds to the existing branch's frequency. 
 Node *Node::addLetter(char letter, int freq, bool terminal, int id)
 {
     map<char, Node *>::iterator it = branches.find(letter);
@@ -47,6 +54,7 @@ Node *Node::addLetter(char letter, int freq, bool terminal, int id)
     }
 }
 
+// Gets all existing words in the current node's trie.
 void Node::getWords(vector<string> *words, string word)
 {
     for (auto it = branches.begin(); it != branches.end(); ++it)
@@ -67,6 +75,7 @@ void Node::getWords(vector<string> *words, string word)
     }
 }
 
+// Prints the current node (branches, terminality, frequency)
 void Node::printNode(int offset)
 {
     string tabs = "";
@@ -87,6 +96,7 @@ void Node::printNode(int offset)
     }
 }
 
+// Node constructor.
 Node::Node(bool terminality, int idInput)
 {
     terminal = terminality;

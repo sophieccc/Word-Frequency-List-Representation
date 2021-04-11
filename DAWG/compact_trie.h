@@ -26,17 +26,21 @@ public:
     void writeWordProbas(string inputFile, string outputFile);
 
     void writeToFile(string fileName, bool useLogs);
+    void writeAlphabet(ofstream *outfile);
+    pair<int, int> writeTrieInfo(ofstream *outfile, bool useLogs);
     int getMaxFrequency();
     void setMinLogBase(int maxFreq);
     int getIntegerMode(int listSize);
     void writeInteger(unsigned int index, ofstream *outfile, int queueMode, bool logVals);
-    void origIntegerWrite(unsigned int index, ofstream *outfile);
+    void anyByteWrite(unsigned int index, ofstream *outfile);
     void oneOrTwoBytesWrite(unsigned int index, ofstream *outfile);
     void twoOrThreeBytesWrite(unsigned int index, ofstream *outfile);
     void readFromFile(string fileName);
     void readArrays(int listSize, int queueMode, int freqMode, ifstream *infile, bool useLogs);
+    pair<pair<char, int>, bool> constructBranch
+    (unsigned char curr, int freqMode, ifstream *infile, bool useLogs, vector<bool> *terminality);
     int getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals);
-    int origIntegerRead(ifstream *infile, unsigned char firstChar);
+    int anyByteRead(ifstream *infile, unsigned char firstChar);
     int oneOrTwoBytesRead(ifstream *infile, unsigned char firstChar);
     int twoOrThreeBytesRead(ifstream *infile, unsigned char firstChar);
 

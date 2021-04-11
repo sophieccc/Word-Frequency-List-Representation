@@ -6,8 +6,8 @@
 
 using namespace std;
 
-// Compacted = Read pre-created array ver. of trie.
-// Non-Compacted = Read word-freq list to first create pointer ver. of trie.
+// Compacted -> Read in pre-created array ver. of trie.
+// Non-Compacted -> Read in word-freq list to first create pointer ver. of trie.
 CompactTrie::CompactTrie(string fileName, bool compacted)
 {
     ifstream file;
@@ -26,10 +26,13 @@ CompactTrie::CompactTrie(string fileName, bool compacted)
         createCode();
     }
 }
+
+// Converts pointer-trie (trie.cpp) into a compacted array-trie. 
 void CompactTrie::processTrie(Trie t)
 {
     counter = t.rootNode->branches.size();
     nodes.push(t.rootNode);
+    // Processes the nodes in a queue.
     while (!nodes.empty())
     {
         Node *curr = nodes.front();
@@ -45,14 +48,20 @@ void CompactTrie::processTrie(Trie t)
             {
                 alphabet.insert(it->first);
             }
-            branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(it->first, freq), last));
+            branchList.push_back(
+                pair<pair<char, int>, bool>(pair<char, int>(it->first, freq), last));
             processNode(it->second, last);
         }
         nodes.pop();
     }
 }
+
+// Processes the current pointer node in order to create the compact trie.
 void CompactTrie::processNode(Node *n, bool last)
 {
+    // If the node has not been processed before, 
+    // the overall counter is used, i.e. the node points to
+    // the current end of the array.
     if (n->counter == -1)
     {
         n->counter = counter;
@@ -67,6 +76,8 @@ void CompactTrie::processNode(Node *n, bool last)
         nodes.push(n);
         counter += n->branches.size();
     }
+    // Otherwise, the node's current counter is used, i.e. the
+    // node it points to is already known.
     else
     {
         if (n->terminal && n->branches.size() == 0)
@@ -79,6 +90,10 @@ void CompactTrie::processNode(Node *n, bool last)
         }
     }
 }
+
+// Creates a mapping of letters to numbers and numbers to letters. 
+// The numbers determine whether the current branch is the last
+// branch of a node and if the node it points to is terminal.
 void CompactTrie::createCode()
 {
     for (int i = 1; i <= 256; i += 64)
@@ -95,6 +110,8 @@ void CompactTrie::createCode()
         }
     }
 }
+
+// Checks if a given word exists in the trie.
 bool CompactTrie::doesWordExist(string word)
 {
     int index = 0;
@@ -125,6 +142,8 @@ bool CompactTrie::doesWordExist(string word)
     }
     return nodeList[index].second;
 }
+
+// Displays the arrays of branches and nodes. 
 void CompactTrie::displayLists()
 {
     cout << "branchList" << endl;
@@ -139,6 +158,8 @@ void CompactTrie::displayLists()
         cout << "(" << it->first << "," << it->second << ") ";
     }
 }
+
+// Writes all the possible words in the trie to a file.
 void CompactTrie::writeLexicon()
 {
     vector<string> words;
@@ -149,6 +170,8 @@ void CompactTrie::writeLexicon()
         output_file << words.at(i) << endl;
     }
 }
+
+// Gets all possible words in the trie.
 void CompactTrie::getWords(vector<string> *words, string word, int index)
 {
     bool lastBranch = false;
@@ -170,6 +193,10 @@ void CompactTrie::getWords(vector<string> *words, string word, int index)
         }
     }
 }
+
+// Gets the original word frequency of a word from the trie. 
+// This function does not always work due to fundamental DAWG aspects 
+// that mean some information is lost. It should only be used for debugging.
 int CompactTrie::getWordFrequency(string word)
 {
     int curr = 0;
@@ -201,6 +228,8 @@ int CompactTrie::getWordFrequency(string word)
     currResult += dawgFreq;
     return currResult;
 }
+
+// Gets the total frequency of all the branches coming out of a node. 
 int CompactTrie::getTotal(int index)
 {
     int total = 0;
@@ -212,6 +241,9 @@ int CompactTrie::getTotal(int index)
     }
     return total;
 }
+
+// Finds the branch labelled with the given letter from
+// the nodes at the current index in the node array.
 int CompactTrie::findLetter(int index, char letter)
 {
     int branch = -1;
@@ -227,6 +259,7 @@ int CompactTrie::findLetter(int index, char letter)
     return branch;
 }
 
+// Gets the relative likelihood of a word in the trie.
 double CompactTrie::getWordProbability(string word)
 {
     if (doesWordExist(word))
@@ -261,6 +294,7 @@ double CompactTrie::getWordProbability(string word)
     }
 }
 
+// Writes the probability of each given word to a file.
 void CompactTrie::writeWordProbas(string inputFile, string outputFile)
 {
     ifstream infile;
@@ -282,31 +316,14 @@ void CompactTrie::writeWordProbas(string inputFile, string outputFile)
 /* *
 FILE I/O SECTION
 *  */
+
+// Writes the compacted trie to a file for future construction/use.
 void CompactTrie::writeToFile(string fileName, bool useLogs)
 {
     ofstream outfile;
     outfile.open(fileName, ios::out | ios::binary);
-    unsigned char alphabetSize = alphabet.size();
-    outfile.write((char *)(&alphabetSize), sizeof(alphabetSize));
-    for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
-    {
-        outfile.write((char *)(&(*it)), sizeof(char));
-    }
-    unsigned int listSize = branchList.size();
-    outfile.write(reinterpret_cast<char *>(&listSize), sizeof(int));
-    int queueMode = getIntegerMode(listSize);
-    unsigned int maxFreq = getMaxFrequency();
-    setMinLogBase(maxFreq);
-    outfile.write(reinterpret_cast<char *>(&useLogs), sizeof(char));
-    if (useLogs)
-    {
-        maxFreq = round((log(maxFreq) / log(logBase)) * multiplier);
-    }
-    outfile.write(reinterpret_cast<char *>(&logBase), sizeof(int));
-    outfile.write(reinterpret_cast<char *>(&maxFreq), sizeof(int));
-    int freqMode = getIntegerMode(maxFreq);
-    cout << maxFreq << " " << freqMode << endl;
-    cout << branchList.size() << endl;
+    writeAlphabet(&outfile);
+    pair<int,int> modes = writeTrieInfo(&outfile, useLogs);
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
         unsigned char letter = charToNum.at(it->first.first);
@@ -321,14 +338,47 @@ void CompactTrie::writeToFile(string fileName, bool useLogs)
         }
         outfile.write((char *)(&letter), sizeof(letter));
         unsigned int frequency = it->first.second;
-        writeInteger(frequency, &outfile, freqMode, useLogs);
+        writeInteger(frequency, &outfile, modes.second, useLogs);
     }
     for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
     {
         unsigned int index = it->first;
-        writeInteger(index, &outfile, queueMode, false);
+        writeInteger(index, &outfile, modes.first, false);
     }
 }
+
+// Writes all of the symbols existing in the trie to a file.
+void CompactTrie::writeAlphabet(ofstream *outfile)
+{
+    unsigned char alphabetSize = alphabet.size();
+    outfile->write((char *)(&alphabetSize), sizeof(alphabetSize));
+    for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
+    {
+        outfile->write((char *)(&(*it)), sizeof(char));
+    }
+}
+
+// Writes all necessary information needed to reconstruct the trie to a file.
+// Returns the encoding modes for queue indices and frequencies.
+pair<int, int> CompactTrie::writeTrieInfo(ofstream *outfile, bool useLogs)
+{
+    unsigned int listSize = branchList.size();
+    outfile->write(reinterpret_cast<char *>(&listSize), sizeof(int));
+    int queueMode = getIntegerMode(listSize);
+    unsigned int maxFreq = getMaxFrequency();
+    setMinLogBase(maxFreq);
+    outfile->write(reinterpret_cast<char *>(&useLogs), sizeof(char));
+    if (useLogs)
+    {
+        maxFreq = round((log(maxFreq) / log(logBase)) * multiplier);
+    }
+    outfile->write(reinterpret_cast<char *>(&logBase), sizeof(int));
+    outfile->write(reinterpret_cast<char *>(&maxFreq), sizeof(int));
+    int freqMode = getIntegerMode(maxFreq);
+    return pair<int,int>(queueMode, freqMode);
+}
+
+// Gets the maximum possible frequency in the trie.
 int CompactTrie::getMaxFrequency()
 {
     int maxFreq = 0;
@@ -342,6 +392,9 @@ int CompactTrie::getMaxFrequency()
     }
     return maxFreq;
 }
+
+// Sets the minimum possible log base to use in order for
+// all of the logged frequencies up to maxFreq to be < 10.0
 void CompactTrie::setMinLogBase(int maxFreq)
 {
     float divisor = (float)multiplier / 100.0;
@@ -354,29 +407,32 @@ void CompactTrie::setMinLogBase(int maxFreq)
         maxLog = log(maxFreq) / log(logBase);
     }
 }
-int CompactTrie::getIntegerMode(int listSize)
+
+// Gets the most suitable encoding mode to use based on what
+// the maximum number needing to be encoded will be.
+int CompactTrie::getIntegerMode(int maxNumber)
 {
-    if (listSize < 256)
+    if (maxNumber < 256)
     {
         return 2;
     }
-    else if (listSize < 32768)
+    else if (maxNumber < 32768)
     {
         return 1;
     }
-    else if (listSize < 65536)
+    else if (maxNumber < 65536)
     {
         return 3;
     }
-    else if (listSize < 4194304)
+    else if (maxNumber < 4194304)
     {
         return -1;
     }
-    else if (listSize < 8388608)
+    else if (maxNumber < 8388608)
     {
         return 0;
     }
-    else if (listSize < 16777216)
+    else if (maxNumber < 16777216)
     {
         return 4;
     }
@@ -385,6 +441,8 @@ int CompactTrie::getIntegerMode(int listSize)
         return 5;
     }
 }
+
+// Writes the current number to file in a suitable manner, based on mod and logVals.
 void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
 {
     if (logVals == true)
@@ -397,7 +455,7 @@ void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, 
     }
     if (mode == -1)
     {
-        origIntegerWrite(index, outfile);
+        anyByteWrite(index, outfile);
     }
     else if (mode == 1)
     {
@@ -427,7 +485,11 @@ void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, 
         }
     }
 }
-void CompactTrie::origIntegerWrite(unsigned int index, ofstream *outfile)
+
+// The encoding mode used in Michael Burke's implementation of a DAWG.
+// It can use one, two, or three bytes and therefore has a flag in both
+// the first and second bytes.
+void CompactTrie::anyByteWrite(unsigned int index, ofstream *outfile)
 {
     unsigned char curr;
     if (index < 128)
@@ -454,6 +516,9 @@ void CompactTrie::origIntegerWrite(unsigned int index, ofstream *outfile)
         }
     }
 }
+
+// Writes the file in either one or two bytes, meaning only the first byte 
+// contains a flag.
 void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
 {
     unsigned char curr;
@@ -471,6 +536,9 @@ void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
         outfile->write((char *)(&curr), sizeof(curr));
     }
 }
+
+// Writes the file in either two or three bytes, meaning only the second byte 
+// contains a flag.
 void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
 {
     unsigned char firstChar = ((index % 256) + 256);
@@ -494,6 +562,8 @@ void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
         outfile->write((char *)(&thirdChar), sizeof(thirdChar));
     }
 }
+
+// reads the compacted trie in from a file and constructs it.
 void CompactTrie::readFromFile(string fileName)
 {
     std::ifstream infile;
@@ -516,9 +586,10 @@ void CompactTrie::readFromFile(string fileName)
     unsigned int maxFreq = 0;
     infile.read(reinterpret_cast<char *>(&maxFreq), sizeof(maxFreq));
     int freqMode = getIntegerMode(maxFreq);
-    cout << queueMode << " " << freqMode << endl;
     readArrays(listSize, queueMode, freqMode, &infile, useLogs);
 }
+
+// Constructs the branchList and the nodeList.
 void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream *infile, bool useLogs)
 {
     unsigned char curr;
@@ -526,31 +597,9 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
     for (int j = 0; j < listSize; j++)
     {
         infile->read((char *)(&curr), sizeof(curr));
-        bool lastBranch = false;
-        unsigned char letter = numToChar[int(curr)];
-        if (int(curr) > 192 || (int(curr) > 64 && int(curr) < 129))
-        {
-            lastBranch = true;
-        }
-        if (int(curr) > 128)
-        {
-            terminality.push_back(true);
-        }
-        else
-        {
-            terminality.push_back(false);
-        }
-        unsigned int frequency;
-        if (freqMode == 5)
-        {
-            infile->read((char *)(&frequency), sizeof(int));
-        }
-        else
-        {
-            infile->read((char *)(&curr), sizeof(char));
-            frequency = getIntegerVal(infile, curr, freqMode, useLogs);
-        }
-        branchList.push_back(pair<pair<char, int>, bool>(pair<char, int>(letter, frequency), lastBranch));
+        pair<pair<char, int>, bool> branch = 
+        constructBranch(curr, freqMode, infile, useLogs, &terminality);
+        branchList.push_back(branch);
     }
     int i = 0;
     int index = 0;
@@ -574,12 +623,44 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
         }
     }
 }
+
+// Constructs a branch for the compact trie based on file information.
+pair<pair<char, int>, bool> CompactTrie::constructBranch
+(unsigned char curr, int freqMode, ifstream *infile, bool useLogs, vector<bool> *terminality)
+{
+    bool lastBranch = false;
+    unsigned char letter = numToChar[int(curr)];
+    if (int(curr) > 192 || (int(curr) > 64 && int(curr) < 129))
+    {
+        lastBranch = true;
+    }
+    if (int(curr) > 128)
+    {
+        terminality->push_back(true);
+    }
+    else
+    {
+        terminality->push_back(false);
+    }
+    unsigned int frequency;
+    if (freqMode == 5)
+    {
+        infile->read((char *)(&frequency), sizeof(int));
+    }
+    else
+    {
+        infile->read((char *)(&curr), sizeof(char));
+        frequency = getIntegerVal(infile, curr, freqMode, useLogs);
+    }
+}
+
+// Gets an integer value from file based on the encoding mode.
 int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
 {
     unsigned int index = 0;
     if (mode == -1)
     {
-        index = origIntegerRead(infile, firstChar);
+        index = anyByteRead(infile, firstChar);
     }
     else if (mode == 1)
     {
@@ -617,7 +698,11 @@ int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mo
     }
     return index;
 }
-int CompactTrie::origIntegerRead(ifstream *infile, unsigned char curr)
+
+// The encoding mode used in Michael Burke's implementation of a DAWG.
+// It can use one, two, or three bytes and therefore has a flag in both
+// the first and second bytes.
+int CompactTrie::anyByteRead(ifstream *infile, unsigned char curr)
 {
     int index = 0;
     if (curr <= 127)
@@ -644,6 +729,9 @@ int CompactTrie::origIntegerRead(ifstream *infile, unsigned char curr)
     }
     return index;
 }
+
+// Reads either one or two bytes from file, meaning only the first byte 
+// contains a flag.
 int CompactTrie::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
 {
     int index = 0;
@@ -660,6 +748,8 @@ int CompactTrie::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
     }
     return index;
 }
+
+// Reads either two or three bytes, meaning only the second byte contains a flag.
 int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
 {
     int index = curr;

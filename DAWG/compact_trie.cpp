@@ -27,7 +27,7 @@ CompactTrie::CompactTrie(string fileName, bool compacted)
     }
 }
 
-// Converts pointer-trie (trie.cpp) into a compacted array-trie. 
+// Converts pointer-trie (trie.cpp) into a compacted array-trie.
 void CompactTrie::processTrie(Trie t)
 {
     counter = t.rootNode->branches.size();
@@ -59,7 +59,7 @@ void CompactTrie::processTrie(Trie t)
 // Processes the current pointer node in order to create the compact trie.
 void CompactTrie::processNode(Node *n, bool last)
 {
-    // If the node has not been processed before, 
+    // If the node has not been processed before,
     // the overall counter is used, i.e. the node points to
     // the current end of the array.
     if (n->counter == -1)
@@ -91,7 +91,7 @@ void CompactTrie::processNode(Node *n, bool last)
     }
 }
 
-// Creates a mapping of letters to numbers and numbers to letters. 
+// Creates a mapping of letters to numbers and numbers to letters.
 // The numbers determine whether the current branch is the last
 // branch of a node and if the node it points to is terminal.
 void CompactTrie::createCode()
@@ -143,7 +143,7 @@ bool CompactTrie::doesWordExist(string word)
     return nodeList[index].second;
 }
 
-// Displays the arrays of branches and nodes. 
+// Displays the arrays of branches and nodes.
 void CompactTrie::displayLists()
 {
     cout << "branchList" << endl;
@@ -152,7 +152,8 @@ void CompactTrie::displayLists()
         cout << "(" << it->first.first << "," << it->second << ","
              << "f=" << it->first.second << ") ";
     }
-    cout << endl << "nodeList" << endl;
+    cout << endl
+         << "nodeList" << endl;
     for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
     {
         cout << "(" << it->first << "," << it->second << ") ";
@@ -194,8 +195,8 @@ void CompactTrie::getWords(vector<string> *words, string word, int index)
     }
 }
 
-// Gets the original word frequency of a word from the trie. 
-// This function does not always work due to fundamental DAWG aspects 
+// Gets the original word frequency of a word from the trie.
+// This function does not always work due to fundamental DAWG aspects
 // that mean some information is lost. It should only be used for debugging.
 int CompactTrie::getWordFrequency(string word)
 {
@@ -229,7 +230,7 @@ int CompactTrie::getWordFrequency(string word)
     return currResult;
 }
 
-// Gets the total frequency of all the branches coming out of a node. 
+// Gets the total frequency of all the branches coming out of a node.
 int CompactTrie::getTotal(int index)
 {
     int total = 0;
@@ -323,7 +324,7 @@ void CompactTrie::writeToFile(string fileName, bool useLogs)
     ofstream outfile;
     outfile.open(fileName, ios::out | ios::binary);
     writeAlphabet(&outfile);
-    pair<int,int> modes = writeTrieInfo(&outfile, useLogs);
+    pair<int, int> modes = writeTrieInfo(&outfile, useLogs);
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
         unsigned char letter = charToNum.at(it->first.first);
@@ -375,7 +376,7 @@ pair<int, int> CompactTrie::writeTrieInfo(ofstream *outfile, bool useLogs)
     outfile->write(reinterpret_cast<char *>(&logBase), sizeof(int));
     outfile->write(reinterpret_cast<char *>(&maxFreq), sizeof(int));
     int freqMode = getIntegerMode(maxFreq);
-    return pair<int,int>(queueMode, freqMode);
+    return pair<int, int>(queueMode, freqMode);
 }
 
 // Gets the maximum possible frequency in the trie.
@@ -517,7 +518,7 @@ void CompactTrie::anyByteWrite(unsigned int index, ofstream *outfile)
     }
 }
 
-// Writes the file in either one or two bytes, meaning only the first byte 
+// Writes the file in either one or two bytes, meaning only the first byte
 // contains a flag.
 void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
 {
@@ -537,7 +538,7 @@ void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
     }
 }
 
-// Writes the file in either two or three bytes, meaning only the second byte 
+// Writes the file in either two or three bytes, meaning only the second byte
 // contains a flag.
 void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
 {
@@ -597,8 +598,8 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
     for (int j = 0; j < listSize; j++)
     {
         infile->read((char *)(&curr), sizeof(curr));
-        pair<pair<char, int>, bool> branch = 
-        constructBranch(curr, freqMode, infile, useLogs, &terminality);
+        pair<pair<char, int>, bool> branch =
+            constructBranch(curr, freqMode, infile, useLogs, &terminality);
         branchList.push_back(branch);
     }
     int i = 0;
@@ -625,8 +626,8 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
 }
 
 // Constructs a branch for the compact trie based on file information.
-pair<pair<char, int>, bool> CompactTrie::constructBranch
-(unsigned char curr, int freqMode, ifstream *infile, bool useLogs, vector<bool> *terminality)
+pair<pair<char, int>, bool> CompactTrie::constructBranch(
+    unsigned char curr, int freqMode, ifstream *infile, bool useLogs, vector<bool> *terminality)
 {
     bool lastBranch = false;
     unsigned char letter = numToChar[int(curr)];
@@ -730,7 +731,7 @@ int CompactTrie::anyByteRead(ifstream *infile, unsigned char curr)
     return index;
 }
 
-// Reads either one or two bytes from file, meaning only the first byte 
+// Reads either one or two bytes from file, meaning only the first byte
 // contains a flag.
 int CompactTrie::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
 {

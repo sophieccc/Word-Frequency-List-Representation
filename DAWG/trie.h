@@ -18,7 +18,7 @@ public:
     int getCommonPrefix(string current, string previous);
     Node *traversePrefix(string prefix, int freq);
     void addSuffix(string word, int freq, Node *current);
-    void replace_or_register(Node *curr, int index, int prevFreq, int currFreq);
+    void minimise(Node *curr, int index, int prevFreq, int currFreq);
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();

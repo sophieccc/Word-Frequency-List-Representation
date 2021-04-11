@@ -96,7 +96,6 @@ void Node::printNode(int offset)
     }
 }
 
-// Node constructor.
 Node::Node(bool terminality, int idInput)
 {
     terminal = terminality;

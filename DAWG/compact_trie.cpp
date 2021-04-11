@@ -3,7 +3,9 @@
 #include <iterator>
 #include <cmath>
 #include "compact_trie.h"
+
 using namespace std;
+
 // Compacted = Read pre-created array ver. of trie.
 // Non-Compacted = Read word-freq list to first create pointer ver. of trie.
 CompactTrie::CompactTrie(string fileName, bool compacted)

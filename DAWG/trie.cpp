@@ -5,6 +5,7 @@
 
 using namespace std;
 
+// Adds all words in the given file to the trie.
 void Trie::addLexicon(ifstream &file)
 {
     string line;
@@ -20,9 +21,12 @@ void Trie::addLexicon(ifstream &file)
         processWord(word, prevFreq, currFreq);
         lineCount++;
     }
-    replace_or_register(rootNode, 0, currFreq, 0);
+    minimise(rootNode, 0, currFreq, 0);
 }
 
+// Adds the current word to the trie and minimises 
+// the non-shared suffix of the previous word. 
+// For an explanation of the process please see the write-up.
 void Trie::processWord(string word, int prevFreq, int currFreq)
 {
     int lastIndex = getCommonPrefix(word, lastWord);
@@ -31,12 +35,13 @@ void Trie::processWord(string word, int prevFreq, int currFreq)
     Node *lastPrefixState = traversePrefix(prefix, currFreq);
     if (lastPrefixState != NULL && lastPrefixState->branches.size() != 0)
     {
-        replace_or_register(lastPrefixState, lastIndex, prevFreq, currFreq);
+        minimise(lastPrefixState, lastIndex, prevFreq, currFreq);
     }
     addSuffix(suffix, currFreq, lastPrefixState);
     lastWord = word;
 }
 
+// Adds the current word's frequency to each traversed branch.
 Node *Trie::traversePrefix(string prefix, int freq)
 {
     Node *tempNode = rootNode;
@@ -51,7 +56,9 @@ Node *Trie::traversePrefix(string prefix, int freq)
     }
     return tempNode;
 }
-void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq)
+
+// Makes it so node-sharing occures for suffixes -- what makes the trie a DAWG.
+void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
 {
     shared = false;
     Node *child = curr->hasLetter(lastWord[index]);
@@ -59,13 +66,17 @@ void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq
     {
         if (child->branches.size() != 0)
         {
-            replace_or_register(child, index + 1, prevFreq, currFreq);
+            minimise(child, index + 1, prevFreq, currFreq);
         }
+        // Gets all nodes in the minimised set that could be equivalent
+        // to the current child node, i.e. have the same hash.
         auto res = minSet.equal_range(child);
         if (res.first == minSet.end())
         {
             child->registered = true;
             minSet.insert(child);
+            // If previous nodes traversed were shared. Once sharing is no
+            // longer possible, the word's frequency is added to all successor nodes.
             if (shared == true && index < lastWord.size() - 1)
             {
                 addFrequencies(child->branches.find(lastWord[index + 1])->second, prevFreq);
@@ -90,6 +101,7 @@ void Trie::replace_or_register(Node *curr, int index, int prevFreq, int currFreq
     }
 }
 
+// Adds frequencies to all suffix nodes when shared. 
 void Trie::addFrequencies(Node *n, int freq)
 {
     if (n->terminal == false)
@@ -102,6 +114,7 @@ void Trie::addFrequencies(Node *n, int freq)
     }
 }
 
+// Checks if two nodes are equivalent.
 bool Trie::checkEquivalence(Node *one, Node *two)
 {
     if (one->terminal == two->terminal)
@@ -118,6 +131,7 @@ bool Trie::checkEquivalence(Node *one, Node *two)
     return false;
 }
 
+// Adds new nodes to the trie for a word's currently non-shared suffix.
 void Trie::addSuffix(string word, int freq, Node *current = NULL)
 {
     if (current == NULL)
@@ -139,6 +153,9 @@ void Trie::addSuffix(string word, int freq, Node *current = NULL)
     }
 }
 
+// Gets the original word frequency of a word from the trie. 
+// This function does not always work due to fundamental DAWG aspects 
+// that mean some information is lost. It should only be used for debugging.
 int Trie::getWordFrequency(string word)
 {
     if (doesWordExist(word))
@@ -184,6 +201,7 @@ int Trie::getWordFrequency(string word)
     }
 }
 
+// Gets the total frequency of all the branches coming out of a node. 
 int Trie::getTotal(Node *n)
 {
     int total = 0;
@@ -193,6 +211,8 @@ int Trie::getTotal(Node *n)
     }
     return total;
 }
+
+// Gets the common prefix of two words.
 int Trie::getCommonPrefix(string current, string previous)
 {
     int i = 0;
@@ -203,6 +223,7 @@ int Trie::getCommonPrefix(string current, string previous)
     return i;
 }
 
+// Checks if a given word exists in the trie.
 bool Trie::doesWordExist(string word)
 {
     Node *lastNode = rootNode->hasWord(word);
@@ -215,6 +236,8 @@ bool Trie::doesWordExist(string word)
         return false;
     }
 }
+
+// Calculates how many nodes and branches are in the trie.
 void Trie::calculateCounts()
 {
     if (nodeCount == 0)
@@ -231,6 +254,7 @@ void Trie::calculateCounts()
     }
 }
 
+// Gets every possible word in the trie.
 vector<string> Trie::getLexicon()
 {
     vector<string> words = vector<string>();

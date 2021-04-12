@@ -22,14 +22,14 @@ def average_percent_difference(column1, column2):
 
 
 def main():
-    df = pd.read_csv("Data/freqs.csv")
+    df = pd.read_csv("Data/curr.csv")
     columns = ['Log with 4 places', 'Log with 3 places', 'Log with 2 places']
     print(df[[
         'Original', 'Log with 4 places', 'Log with 3 places',
         'Log with 2 places'
     ]].describe())
 
-    df.plot()
+    #df.plot()
     #plt.show()
 
     for column in columns:

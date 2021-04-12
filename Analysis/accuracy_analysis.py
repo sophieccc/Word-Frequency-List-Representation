@@ -13,7 +13,7 @@ def average_difference(column1, column2):
     return sum
 
 def main():
-    df = pd.read_csv("curr.csv")
+    df = pd.read_csv("Data/curr.csv")
     columns = ['Log with 4 places', 'Log with 3 places', 'Log with 2 places']
     print(df[['Original','Log with 4 places', 'Log with 3 places', 'Log with 2 places']].describe())
 

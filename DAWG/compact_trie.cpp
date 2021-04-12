@@ -6,8 +6,8 @@
 
 using namespace std;
 
-// Compacted -> Read in pre-created array ver. of trie.
-// Non-Compacted -> Read in word-freq list to first create pointer ver. of trie.
+// Compacted = TRUE -> Read in pre-created array ver. of trie.
+// Compacted = FALSE-> Read in word-freq list to first create pointer ver. of trie.
 CompactTrie::CompactTrie(string fileName, bool compacted)
 {
     ifstream file;
@@ -149,14 +149,14 @@ void CompactTrie::displayLists()
     cout << "branchList" << endl;
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
-        cout << "(" << it->first.first << "," << it->second << ","
-             << "f=" << it->first.second << ") ";
+        cout << "[L=" << it->first.first /*<< ", L=" << it->second */<< ","
+             << " F=" << it->first.second << "]";
     }
     cout << endl
          << "nodeList" << endl;
     for (auto it = nodeList.begin(); it != nodeList.end(); ++it)
     {
-        cout << "(" << it->first << "," << it->second << ") ";
+        cout << "[N=" << it->first << ", T=" << it->second << "]";
     }
 }
 
@@ -500,7 +500,7 @@ void CompactTrie::anyByteWrite(unsigned int index, ofstream *outfile)
     }
     else
     {
-        curr = ((index % 128) + 128);
+        curr = (index % 128) + 128;
         outfile->write((char *)(&curr), sizeof(curr));
         index /= 128;
         if (index < 128)

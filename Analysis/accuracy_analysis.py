@@ -7,17 +7,30 @@ import matplotlib.pyplot as plt
 def average_difference(column1, column2):
     sum = 0
     for val1, val2, in zip(column1, column2):
-        sum += (val1 - val2)
+        sum += abs((val1 - val2))
+    sum = (sum / len(column1))
+    return sum
+
+
+# Gets average difference between pairs in columns.
+def average_percent_difference(column1, column2):
+    sum = 0
+    for val1, val2, in zip(column1, column2):
+        sum += abs((val1 - val2)) / val1
     sum = (sum / len(column1))
     return sum
 
 
 def main():
-    df = pd.read_csv("Data/curr.csv")
+    df = pd.read_csv("Data/freqs.csv")
     columns = ['Log with 4 places', 'Log with 3 places', 'Log with 2 places']
     print(df[[
-        'Original', 'Log with 4 places', 'Log with 3 places', 'Log with 2 places'
+        'Original', 'Log with 4 places', 'Log with 3 places',
+        'Log with 2 places'
     ]].describe())
+
+    df.plot()
+    #plt.show()
 
     for column in columns:
         print(column)
@@ -25,6 +38,7 @@ def main():
         # print(stats.shapiro(df['Original']))
         # print(stats.shapiro(df[column]))
         # plt.hist(df[column], range=(0,0.00005))
+        # plt.show()
 
         # Getting Wilcoxon results.
         result = stats.wilcoxon(df['Original'], df[column])
@@ -40,9 +54,10 @@ def main():
         # This means they do not have the same distribution.
         # AKA if p is smaller, we reject H0 (aka there is diff).
         # If p is bigger, we don't reject H0 (aka there is no diff).
-        print('Average: {0:.14f}\n'.format(
+        print('Average Diff: {0:.14f}'.format(
             average_difference(df['Original'], df[column])))
-        plt.show()
+        print('Average % Diff: {0:.14f}\n'.format(
+            average_percent_difference(df['Original'], df[column])))
 
 
 if __name__ == "__main__":

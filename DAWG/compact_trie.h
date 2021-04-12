@@ -45,11 +45,11 @@ public:
     int twoOrThreeBytesRead(ifstream *infile, unsigned char firstChar);
 
     set<char> alphabet;
+    vector<pair<pair<char, int>, bool>> branchList;
+    vector<pair<int, bool>> nodeList;
 
 protected:
     int counter;
-    vector<pair<pair<char, int>, bool>> branchList;
-    vector<pair<int, bool>> nodeList;
     queue<Node *> nodes;
     map<int, char> numToChar;
     map<char, int> charToNum;

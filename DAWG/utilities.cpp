@@ -2,6 +2,8 @@
 #include <fstream>
 #include <ctype.h>
 #include <algorithm>
+#include <random>
+#include <cmath>
 #include "trie.h"
 #include "compact_trie.h"
 
@@ -100,10 +102,46 @@ void changeAlpha(string filename)
     }
 }
 
+// Stores a subset fo the entire lexicon.
+void normalDist(string filename)
+{
+    random_device rd{};
+    mt19937 gen{rd()};
+    normal_distribution<> d{5,2};
+
+    ifstream file2;
+    file2.open(filename, ios_base::in);
+    string line;
+    int count = 0;
+    ofstream output_file("./normal.txt");
+    while (getline(file2, line))
+    {
+        int split = line.find(" ");
+        string word = line.substr(0, split);
+        int freq = round(d(gen));
+        output_file << word << " " << freq << endl;
+        count++;
+    }
+}
+
+void writeFreqs(string filename, bool logs)
+{
+    CompactTrie compactTrie = CompactTrie(filename, false);
+    compactTrie.writeToFile("compact.txt", logs);
+    CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
+    ofstream output_file("./freqs_log2.txt");
+    for (auto it = compactTrie2.branchList.begin(); it != compactTrie2.branchList.end(); ++it)
+    {
+        output_file << it->first.second << endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     string filename = argv[1];
+    //normalDist(filename);
     //CompactTrie compactTrie = CompactTrie(filename, false);
+    //writeFreqs(filename, true);
     //storeInfo(compactTrie, filename);
     //int n = 56240;
     //storeLexiconSubset(n, filename);

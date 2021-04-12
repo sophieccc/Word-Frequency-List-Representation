@@ -7,6 +7,7 @@
 
 using namespace std;
 
+// Stores useful information about the trie/lexicon.
 void storeInfo(CompactTrie compactTrie, string filename)
 {
     int maxWordLength = 0;
@@ -36,6 +37,7 @@ void storeInfo(CompactTrie compactTrie, string filename)
     output_file << " max_freq=" << maxFreq << " alphabet=" << alphabetSize << endl;
 }
 
+// Stores a subset fo the entire lexicon.
 void storeLexiconSubset(int n, string filename)
 {
     ifstream file2;
@@ -53,6 +55,7 @@ void storeLexiconSubset(int n, string filename)
     }
 }
 
+// Only keeps words that just contain alphabetical symbols.
 void cleanFile(string filename)
 {
     ifstream file2;
@@ -79,6 +82,7 @@ void cleanFile(string filename)
     }
 }
 
+// Reduces the size of the lexicon alphabet.
 void changeAlpha(string filename)
 {
     ifstream file2;

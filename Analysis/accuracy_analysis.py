@@ -40,6 +40,17 @@ def main():
         # plt.hist(df[column], range=(0,0.00005))
         # plt.show()
 
+        res = stats.linregress(df['Original'], df[column])
+        print("R-squared: {}".format(res.rvalue))     
+        tinv = lambda p, df: abs(stats.t.ppf(p/2, df))
+        ts = tinv(0.05, len(df['Original'])-2)
+        print("slope (95%): {} +/- {}".format(res.slope,ts*res.stderr))
+
+        # plt.plot(df['Original'], df[column], 'o', label='original data')
+        # plt.plot(df['Original'], res.intercept + res.slope*df['Original'], 'r', label='fitted line')
+        # plt.legend()
+        # plt.show()
+
         # Getting Wilcoxon results.
         result = stats.wilcoxon(df['Original'], df[column])
         print(result)

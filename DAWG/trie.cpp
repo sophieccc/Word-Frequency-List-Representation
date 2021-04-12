@@ -36,6 +36,11 @@ void Trie::processWord(string word, int prevFreq, int currFreq)
     if (lastPrefixState != NULL && lastPrefixState->branches.size() != 0)
     {
         minimise(lastPrefixState, lastIndex, prevFreq, currFreq);
+        if(shared == true)
+        {
+            addFrequencies(lastPrefixState->branches.find(lastWord[lastIndex])->second, prevFreq);
+            shared = false;
+        }
     }
     addSuffix(suffix, currFreq, lastPrefixState);
     lastWord = word;
@@ -73,15 +78,7 @@ void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
         auto res = minSet.equal_range(child);
         if (res.first == minSet.end())
         {
-            child->registered = true;
-            minSet.insert(child);
-            // If previous nodes traversed were shared. Once sharing is no
-            // longer possible, the word's frequency is added to all successor nodes.
-            if (shared == true && index < lastWord.size() - 1)
-            {
-                addFrequencies(child->branches.find(lastWord[index + 1])->second, prevFreq);
-            }
-            shared = false;
+            addNode(child, index, prevFreq);
         }
         else
         {
@@ -97,10 +94,26 @@ void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
                     delete child;
                 }
             }
+            if(!found)
+            {
+                addNode(child, index, prevFreq);
+            }
         }
     }
 }
 
+void Trie::addNode(Node* child, int index, int prevFreq)
+{
+    child->registered = true;
+    minSet.insert(child);
+    // If previous nodes traversed were shared. Once sharing is no
+    // longer possible, the word's frequency is added to all successor nodes.
+    if (shared == true && index < lastWord.size() - 1)
+    {
+        addFrequencies(child->branches.find(lastWord[index + 1])->second, prevFreq);
+    }
+    shared = false;  
+}
 // Adds frequencies to all suffix nodes when shared. 
 void Trie::addFrequencies(Node *n, int freq)
 {

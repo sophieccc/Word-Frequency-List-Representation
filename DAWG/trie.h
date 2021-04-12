@@ -19,6 +19,7 @@ public:
     Node *traversePrefix(string prefix, int freq);
     void addSuffix(string word, int freq, Node *current);
     void minimise(Node *curr, int index, int prevFreq, int currFreq);
+    void addNode(Node* child, int index, int prevFreq);
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();

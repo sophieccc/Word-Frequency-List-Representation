@@ -653,6 +653,7 @@ pair<pair<char, int>, bool> CompactTrie::constructBranch(
         infile->read((char *)(&curr), sizeof(char));
         frequency = getIntegerVal(infile, curr, freqMode, useLogs);
     }
+    return pair<pair<char, int>, bool>(pair<char, int>(letter,frequency),lastBranch);
 }
 
 // Gets an integer value from file based on the encoding mode.

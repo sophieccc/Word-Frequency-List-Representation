@@ -23,7 +23,7 @@ public:
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();
-    void addFrequencies(Node *n, int freq);
+    void addFrequencies(Node *n, Node *n2);
     int getWordFrequency(string word);
     int getTotal(Node *n);
     Trie();
@@ -38,7 +38,6 @@ protected:
     string lastWord;
     vector<Node *> registered;
     int latestId = 0;
-    bool shared = false;
 };
 
 #endif // TRIE_H

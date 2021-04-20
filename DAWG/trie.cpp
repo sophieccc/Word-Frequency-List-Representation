@@ -36,11 +36,6 @@ void Trie::processWord(string word, int prevFreq, int currFreq)
     if (lastPrefixState != NULL && lastPrefixState->branches.size() != 0)
     {
         minimise(lastPrefixState, lastIndex, prevFreq, currFreq);
-        if(shared == true)
-        {
-            addFrequencies(lastPrefixState->branches.find(lastWord[lastIndex])->second, prevFreq);
-            shared = false;
-        }
     }
     addSuffix(suffix, currFreq, lastPrefixState);
     lastWord = word;
@@ -65,7 +60,6 @@ Node *Trie::traversePrefix(string prefix, int freq)
 // Makes it so node-sharing occures for suffixes -- what makes the trie a DAWG.
 void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
 {
-    shared = false;
     Node *child = curr->hasLetter(lastWord[index]);
     if (child != NULL && child->registered != true)
     {
@@ -88,8 +82,8 @@ void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
                 Node *n = *it;
                 if (checkEquivalence(n, child) == true)
                 {
-                    shared = true;
                     found = true;
+                    addFrequencies(n,child);
                     curr->branches.find(lastWord[index])->second = n;
                     delete child;
                 }
@@ -106,24 +100,13 @@ void Trie::addNode(Node* child, int index, int prevFreq)
 {
     child->registered = true;
     minSet.insert(child);
-    // If previous nodes traversed were shared. Once sharing is no
-    // longer possible, the word's frequency is added to all successor nodes.
-    if (shared == true && index < lastWord.size() - 1)
-    {
-        addFrequencies(child->branches.find(lastWord[index + 1])->second, prevFreq);
-    }
-    shared = false;  
 }
 // Adds frequencies to all suffix nodes when shared. 
-void Trie::addFrequencies(Node *n, int freq)
+void Trie::addFrequencies(Node *n, /* int freq */ Node *n2)
 {
-    if (n->terminal == false)
+    for (auto it = n->branches.begin(), it2 = n2->branches.begin(); it != n->branches.end(); ++it, ++it2)
     {
-        for (auto it = n->branches.begin(); it != n->branches.end(); ++it)
-        {
-            n->branchFreqs.find(it->first)->second += freq;
-            addFrequencies(it->second, freq);
-        }
+        n->branchFreqs.find(it->first)->second += n2->branchFreqs.find(it->first)->second;
     }
 }
 

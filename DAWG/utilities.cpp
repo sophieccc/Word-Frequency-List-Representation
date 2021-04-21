@@ -4,16 +4,16 @@
 #include <algorithm>
 #include <random>
 #include <cmath>
-#include "trie.h"
-#include "compact_trie.h"
+#include "dawg.h"
+#include "compact_dawg.h"
 
 using namespace std;
 
-// Stores useful information about the trie/lexicon.
-void storeInfo(CompactTrie compactTrie, string filename)
+// Stores useful information about the dawg/lexicon.
+void storeInfo(CompactDawg compactDawg, string filename)
 {
     int maxWordLength = 0;
-    int alphabetSize = compactTrie.alphabet.size();
+    int alphabetSize = compactDawg.alphabet.size();
     int numWords = 0;
     int maxFreq = 0;
     ifstream file2;
@@ -126,11 +126,11 @@ void normalDist(string filename)
 
 void writeFreqs(string filename, bool logs)
 {
-    CompactTrie compactTrie = CompactTrie(filename, false);
-    compactTrie.writeToFile("compact.txt", logs);
-    CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
+    CompactDawg compactDawg = CompactDawg(filename, false);
+    compactDawg.writeToFile("compact.txt", logs);
+    CompactDawg compactDawg2 = CompactDawg("compact.txt", true);
     ofstream output_file("./freqs_log2.txt");
-    for (auto it = compactTrie2.branchList.begin(); it != compactTrie2.branchList.end(); ++it)
+    for (auto it = compactDawg2.branchList.begin(); it != compactDawg2.branchList.end(); ++it)
     {
         output_file << it->first.second << endl;
     }
@@ -140,9 +140,9 @@ int main(int argc, char *argv[])
 {
     string filename = argv[1];
     //normalDist(filename);
-    //CompactTrie compactTrie = CompactTrie(filename, false);
+    //CompactDawg compactDawg = CompactDawg(filename, false);
     //writeFreqs(filename, true);
-    //storeInfo(compactTrie, filename);
+    //storeInfo(compactDawg, filename);
     //int n = 56240;
     //storeLexiconSubset(n, filename);
     //cleanFile(filename);

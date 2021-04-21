@@ -2,13 +2,13 @@
 #include <fstream>
 #include <iterator>
 #include <cmath>
-#include "compact_trie.h"
+#include "compact_dawg.h"
 
 using namespace std;
 
-// Compacted = TRUE -> Read in pre-created array ver. of trie.
-// Compacted = FALSE-> Read in word-freq list to first create pointer ver. of trie.
-CompactTrie::CompactTrie(string fileName, bool compacted)
+// Compacted = TRUE -> Read in pre-created array ver. of dawg.
+// Compacted = FALSE-> Read in word-freq list to first create pointer ver. of dawg.
+CompactDawg::CompactDawg(string fileName, bool compacted)
 {
     ifstream file;
     file.open(fileName, ios_base::in);
@@ -18,17 +18,17 @@ CompactTrie::CompactTrie(string fileName, bool compacted)
     }
     else
     {
-        Trie trie = Trie();
+        Dawg dawg = Dawg();
         cout << "Adding Lexicon." << endl;
-        trie.addLexicon(file);
+        dawg.addLexicon(file);
         cout << "Lexicon Added." << endl;
-        processTrie(trie);
+        processDawg(dawg);
         createCode();
     }
 }
 
-// Converts pointer-trie (trie.cpp) into a compacted array-trie.
-void CompactTrie::processTrie(Trie t)
+// Converts pointer-dawg (dawg.cpp) into a compacted array-dawg.
+void CompactDawg::processDawg(Dawg t)
 {
     counter = t.rootNode->branches.size();
     nodes.push(t.rootNode);
@@ -56,8 +56,8 @@ void CompactTrie::processTrie(Trie t)
     }
 }
 
-// Processes the current pointer node in order to create the compact trie.
-void CompactTrie::processNode(Node *n, bool last)
+// Processes the current pointer node in order to create the compact dawg.
+void CompactDawg::processNode(Node *n, bool last)
 {
     // If the node has not been processed before,
     // the overall counter is used, i.e. the node points to
@@ -94,7 +94,7 @@ void CompactTrie::processNode(Node *n, bool last)
 // Creates a mapping of letters to numbers and numbers to letters.
 // The numbers determine whether the current branch is the last
 // branch of a node and if the node it points to is terminal.
-void CompactTrie::createCode()
+void CompactDawg::createCode()
 {
     for (int i = 1; i <= 256; i += 64)
     {
@@ -111,8 +111,8 @@ void CompactTrie::createCode()
     }
 }
 
-// Checks if a given word exists in the trie.
-bool CompactTrie::doesWordExist(string word)
+// Checks if a given word exists in the dawg.
+bool CompactDawg::doesWordExist(string word)
 {
     int index = 0;
     for (int i = 0; i < word.size(); i++)
@@ -144,7 +144,7 @@ bool CompactTrie::doesWordExist(string word)
 }
 
 // Displays the arrays of branches and nodes.
-void CompactTrie::displayLists()
+void CompactDawg::displayLists()
 {
     cout << "branchList" << endl;
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
@@ -160,8 +160,8 @@ void CompactTrie::displayLists()
     }
 }
 
-// Writes all the possible words in the trie to a file.
-void CompactTrie::writeLexicon()
+// Writes all the possible words in the dawg to a file.
+void CompactDawg::writeLexicon()
 {
     vector<string> words;
     getWords(&words, "", 0);
@@ -172,8 +172,8 @@ void CompactTrie::writeLexicon()
     }
 }
 
-// Gets all possible words in the trie.
-void CompactTrie::getWords(vector<string> *words, string word, int index)
+// Gets all possible words in the dawg.
+void CompactDawg::getWords(vector<string> *words, string word, int index)
 {
     bool lastBranch = false;
     for (int ind = index; !lastBranch; ind++)
@@ -195,10 +195,10 @@ void CompactTrie::getWords(vector<string> *words, string word, int index)
     }
 }
 
-// Gets the original word frequency of a word from the trie.
+// Gets the original word frequency of a word from the dawg.
 // This function does not always work due to fundamental DAWG aspects
 // that mean some information is lost. It should only be used for debugging.
-int CompactTrie::getWordFrequency(string word)
+int CompactDawg::getWordFrequency(string word)
 {
     int curr = 0;
     int nodeFreq = getTotal(curr);
@@ -231,7 +231,7 @@ int CompactTrie::getWordFrequency(string word)
 }
 
 // Gets the total frequency of all the branches coming out of a node.
-int CompactTrie::getTotal(int index)
+int CompactDawg::getTotal(int index)
 {
     int total = 0;
     bool lastBranch = false;
@@ -245,7 +245,7 @@ int CompactTrie::getTotal(int index)
 
 // Finds the branch labelled with the given letter from
 // the nodes at the current index in the node array.
-int CompactTrie::findLetter(int index, char letter)
+int CompactDawg::findLetter(int index, char letter)
 {
     int branch = -1;
     bool lastBranch = false;
@@ -260,8 +260,8 @@ int CompactTrie::findLetter(int index, char letter)
     return branch;
 }
 
-// Gets the relative likelihood of a word in the trie.
-double CompactTrie::getWordProbability(string word)
+// Gets the relative likelihood of a word in the dawg.
+double CompactDawg::getWordProbability(string word)
 {
     if (doesWordExist(word))
     {
@@ -296,7 +296,7 @@ double CompactTrie::getWordProbability(string word)
 }
 
 // Writes the probability of each given word to a file.
-void CompactTrie::writeWordProbas(string inputFile, string outputFile)
+void CompactDawg::writeWordProbas(string inputFile, string outputFile)
 {
     ifstream infile;
     infile.open(inputFile, ios_base::in);
@@ -318,13 +318,13 @@ void CompactTrie::writeWordProbas(string inputFile, string outputFile)
 FILE I/O SECTION
 *  */
 
-// Writes the compacted trie to a file for future construction/use.
-void CompactTrie::writeToFile(string fileName, bool useLogs)
+// Writes the compacted dawg to a file for future construction/use.
+void CompactDawg::writeToFile(string fileName, bool useLogs)
 {
     ofstream outfile;
     outfile.open(fileName, ios::out | ios::binary);
     writeAlphabet(&outfile);
-    pair<int, int> modes = writeTrieInfo(&outfile, useLogs);
+    pair<int, int> modes = writeDawgInfo(&outfile, useLogs);
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
     {
         unsigned char letter = charToNum.at(it->first.first);
@@ -348,8 +348,8 @@ void CompactTrie::writeToFile(string fileName, bool useLogs)
     }
 }
 
-// Writes all of the symbols existing in the trie to a file.
-void CompactTrie::writeAlphabet(ofstream *outfile)
+// Writes all of the symbols existing in the dawg to a file.
+void CompactDawg::writeAlphabet(ofstream *outfile)
 {
     unsigned char alphabetSize = alphabet.size();
     outfile->write((char *)(&alphabetSize), sizeof(alphabetSize));
@@ -359,9 +359,9 @@ void CompactTrie::writeAlphabet(ofstream *outfile)
     }
 }
 
-// Writes all necessary information needed to reconstruct the trie to a file.
+// Writes all necessary information needed to reconstruct the dawg to a file.
 // Returns the encoding modes for queue indices and frequencies.
-pair<int, int> CompactTrie::writeTrieInfo(ofstream *outfile, bool useLogs)
+pair<int, int> CompactDawg::writeDawgInfo(ofstream *outfile, bool useLogs)
 {
     unsigned int listSize = branchList.size();
     outfile->write(reinterpret_cast<char *>(&listSize), sizeof(int));
@@ -379,8 +379,8 @@ pair<int, int> CompactTrie::writeTrieInfo(ofstream *outfile, bool useLogs)
     return pair<int, int>(queueMode, freqMode);
 }
 
-// Gets the maximum possible frequency in the trie.
-int CompactTrie::getMaxFrequency()
+// Gets the maximum possible frequency in the dawg.
+int CompactDawg::getMaxFrequency()
 {
     int maxFreq = 0;
     for (auto it = branchList.begin(); it != branchList.end(); ++it)
@@ -396,7 +396,7 @@ int CompactTrie::getMaxFrequency()
 
 // Sets the minimum possible log base to use in order for
 // all of the logged frequencies up to maxFreq to be < 10.0
-void CompactTrie::setMinLogBase(int maxFreq)
+void CompactDawg::setMinLogBase(int maxFreq)
 {
     float divisor = (float)multiplier / 100.0;
     float maxLog = log(maxFreq) / log(logBase);
@@ -411,7 +411,7 @@ void CompactTrie::setMinLogBase(int maxFreq)
 
 // Gets the most suitable encoding mode to use based on what
 // the maximum number needing to be encoded will be.
-int CompactTrie::getIntegerMode(int maxNumber)
+int CompactDawg::getIntegerMode(int maxNumber)
 {
     if (maxNumber < 256)
     {
@@ -444,7 +444,7 @@ int CompactTrie::getIntegerMode(int maxNumber)
 }
 
 // Writes the current number to file in a suitable manner, based on mod and logVals.
-void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
+void CompactDawg::writeInteger(unsigned int index, ofstream *outfile, int mode, bool logVals)
 {
     if (logVals == true)
     {
@@ -490,7 +490,7 @@ void CompactTrie::writeInteger(unsigned int index, ofstream *outfile, int mode, 
 // The encoding mode used in Michael Burke's implementation of a DAWG.
 // It can use one, two, or three bytes and therefore has a flag in both
 // the first and second bytes.
-void CompactTrie::anyByteWrite(unsigned int index, ofstream *outfile)
+void CompactDawg::anyByteWrite(unsigned int index, ofstream *outfile)
 {
     unsigned char curr;
     if (index < 128)
@@ -520,7 +520,7 @@ void CompactTrie::anyByteWrite(unsigned int index, ofstream *outfile)
 
 // Writes the file in either one or two bytes, meaning only the first byte
 // contains a flag.
-void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
+void CompactDawg::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
 {
     unsigned char curr;
     if (index < 128)
@@ -540,7 +540,7 @@ void CompactTrie::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
 
 // Writes the file in either two or three bytes, meaning only the second byte
 // contains a flag.
-void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
+void CompactDawg::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
 {
     unsigned char firstChar = ((index % 256) + 256);
     outfile->write((char *)(&firstChar), sizeof(firstChar));
@@ -564,8 +564,8 @@ void CompactTrie::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
     }
 }
 
-// Reads the compacted trie in from a file and constructs it.
-void CompactTrie::readFromFile(string fileName)
+// Reads the compacted dawg in from a file and constructs it.
+void CompactDawg::readFromFile(string fileName)
 {
     std::ifstream infile;
     infile.open(fileName, ios::in | ios::binary);
@@ -591,7 +591,7 @@ void CompactTrie::readFromFile(string fileName)
 }
 
 // Constructs the branchList and the nodeList.
-void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream *infile, bool useLogs)
+void CompactDawg::readArrays(int listSize, int queueMode, int freqMode, ifstream *infile, bool useLogs)
 {
     unsigned char curr;
     vector<bool> terminality;
@@ -625,8 +625,8 @@ void CompactTrie::readArrays(int listSize, int queueMode, int freqMode, ifstream
     }
 }
 
-// Constructs a branch for the compact trie based on file information.
-pair<pair<char, int>, bool> CompactTrie::constructBranch(
+// Constructs a branch for the compact dawg based on file information.
+pair<pair<char, int>, bool> CompactDawg::constructBranch(
     unsigned char curr, int freqMode, ifstream *infile, bool useLogs, vector<bool> *terminality)
 {
     bool lastBranch = false;
@@ -657,7 +657,7 @@ pair<pair<char, int>, bool> CompactTrie::constructBranch(
 }
 
 // Gets an integer value from file based on the encoding mode.
-int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
+int CompactDawg::getIntegerVal(ifstream *infile, unsigned char firstChar, int mode, bool logVals)
 {
     unsigned int index = 0;
     if (mode == -1)
@@ -704,7 +704,7 @@ int CompactTrie::getIntegerVal(ifstream *infile, unsigned char firstChar, int mo
 // The encoding mode used in Michael Burke's implementation of a DAWG.
 // It can use one, two, or three bytes and therefore has a flag in both
 // the first and second bytes.
-int CompactTrie::anyByteRead(ifstream *infile, unsigned char curr)
+int CompactDawg::anyByteRead(ifstream *infile, unsigned char curr)
 {
     int index = 0;
     if (curr <= 127)
@@ -734,7 +734,7 @@ int CompactTrie::anyByteRead(ifstream *infile, unsigned char curr)
 
 // Reads either one or two bytes from file, meaning only the first byte
 // contains a flag.
-int CompactTrie::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
+int CompactDawg::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
 {
     int index = 0;
     if (curr <= 127)
@@ -752,7 +752,7 @@ int CompactTrie::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
 }
 
 // Reads either two or three bytes, meaning only the second byte contains a flag.
-int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
+int CompactDawg::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
 {
     int index = curr;
     unsigned char secondChar;
@@ -774,8 +774,8 @@ int CompactTrie::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
 
 int main(int argc, char *argv[])
 {
-    CompactTrie compactTrie = CompactTrie(argv[1], false);
-    compactTrie.writeToFile("compact.txt", false);
-    CompactTrie compactTrie2 = CompactTrie("compact.txt", true);
-    compactTrie2.writeLexicon();
+    CompactDawg compactDawg = CompactDawg(argv[1], false);
+    compactDawg.writeToFile("compact.txt", false);
+    CompactDawg compactDawg2 = CompactDawg("compact.txt", true);
+    compactDawg2.writeLexicon();
 }

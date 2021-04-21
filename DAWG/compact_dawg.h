@@ -1,18 +1,18 @@
-#if !defined(COMPACT_TRIE_H)
-#define COMPACT_TRIE_H
+#if !defined(COMPACT_DAWG_H)
+#define COMPACT_DAWG_H
 
-#include "trie.h"
+#include "dawg.h"
 #include <queue>
 #include <set>
 
 using namespace std;
 
-class CompactTrie
+class CompactDawg
 {
 
 public:
-    CompactTrie(string fileName, bool compacted);
-    void processTrie(Trie t);
+    CompactDawg(string fileName, bool compacted);
+    void processDawg(Dawg t);
     void processNode(Node *n, bool lastBranch);
     void createCode();
     bool doesWordExist(string word);
@@ -27,7 +27,7 @@ public:
 
     void writeToFile(string fileName, bool useLogs);
     void writeAlphabet(ofstream *outfile);
-    pair<int, int> writeTrieInfo(ofstream *outfile, bool useLogs);
+    pair<int, int> writeDawgInfo(ofstream *outfile, bool useLogs);
     int getMaxFrequency();
     void setMinLogBase(int maxFreq);
     int getIntegerMode(int listSize);
@@ -57,4 +57,4 @@ protected:
     int logBase = 2;
 };
 
-#endif // COMPACT_TRIE_H
+#endif // COMPACT_DAWG_H

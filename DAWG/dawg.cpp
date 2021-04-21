@@ -1,12 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include "trie.h"
+#include "dawg.h"
 
 using namespace std;
 
-// Adds all words in the given file to the trie.
-void Trie::addLexicon(ifstream &file)
+// Adds all words in the given file to the dawg.
+void Dawg::addLexicon(ifstream &file)
 {
     string line;
     int lineCount = 0;
@@ -24,10 +24,10 @@ void Trie::addLexicon(ifstream &file)
     minimise(rootNode, 0, currFreq, 0);
 }
 
-// Adds the current word to the trie and minimises 
+// Adds the current word to the dawg and minimises 
 // the non-shared suffix of the previous word. 
 // For an explanation of the process please see the write-up.
-void Trie::processWord(string word, int prevFreq, int currFreq)
+void Dawg::processWord(string word, int prevFreq, int currFreq)
 {
     int lastIndex = getCommonPrefix(word, lastWord);
     string prefix = word.substr(0, lastIndex);
@@ -42,7 +42,7 @@ void Trie::processWord(string word, int prevFreq, int currFreq)
 }
 
 // Adds the current word's frequency to each traversed branch.
-Node *Trie::traversePrefix(string prefix, int freq)
+Node *Dawg::traversePrefix(string prefix, int freq)
 {
     Node *tempNode = rootNode;
     for (int i = 0; i < prefix.length(); i++)
@@ -57,8 +57,8 @@ Node *Trie::traversePrefix(string prefix, int freq)
     return tempNode;
 }
 
-// Makes it so node-sharing occures for suffixes -- what makes the trie a DAWG.
-void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
+// Makes it so node-sharing occures for suffixes -- what makes the dawg a DAWG.
+void Dawg::minimise(Node *curr, int index, int prevFreq, int currFreq)
 {
     Node *child = curr->hasLetter(lastWord[index]);
     if (child != NULL && child->registered != true)
@@ -96,13 +96,13 @@ void Trie::minimise(Node *curr, int index, int prevFreq, int currFreq)
     }
 }
 
-void Trie::addNode(Node* child, int index, int prevFreq)
+void Dawg::addNode(Node* child, int index, int prevFreq)
 {
     child->registered = true;
     minSet.insert(child);
 }
 // Adds frequencies to all suffix nodes when shared. 
-void Trie::addFrequencies(Node *n, /* int freq */ Node *n2)
+void Dawg::addFrequencies(Node *n, /* int freq */ Node *n2)
 {
     for (auto it = n->branches.begin(), it2 = n2->branches.begin(); it != n->branches.end(); ++it, ++it2)
     {
@@ -111,7 +111,7 @@ void Trie::addFrequencies(Node *n, /* int freq */ Node *n2)
 }
 
 // Checks if two nodes are equivalent.
-bool Trie::checkEquivalence(Node *one, Node *two)
+bool Dawg::checkEquivalence(Node *one, Node *two)
 {
     if (one->terminal == two->terminal)
     {
@@ -127,8 +127,8 @@ bool Trie::checkEquivalence(Node *one, Node *two)
     return false;
 }
 
-// Adds new nodes to the trie for a word's currently non-shared suffix.
-void Trie::addSuffix(string word, int freq, Node *current = NULL)
+// Adds new nodes to the dawg for a word's currently non-shared suffix.
+void Dawg::addSuffix(string word, int freq, Node *current = NULL)
 {
     if (current == NULL)
     {
@@ -149,10 +149,10 @@ void Trie::addSuffix(string word, int freq, Node *current = NULL)
     }
 }
 
-// Gets the original word frequency of a word from the trie. 
+// Gets the original word frequency of a word from the dawg. 
 // This function does not always work due to fundamental DAWG aspects 
 // that mean some information is lost. It should only be used for debugging.
-int Trie::getWordFrequency(string word)
+int Dawg::getWordFrequency(string word)
 {
     if (doesWordExist(word))
     {
@@ -198,7 +198,7 @@ int Trie::getWordFrequency(string word)
 }
 
 // Gets the total frequency of all the branches coming out of a node. 
-int Trie::getTotal(Node *n)
+int Dawg::getTotal(Node *n)
 {
     int total = 0;
     for (auto it = n->branchFreqs.begin(); it != n->branchFreqs.end(); ++it)
@@ -209,7 +209,7 @@ int Trie::getTotal(Node *n)
 }
 
 // Gets the common prefix of two words.
-int Trie::getCommonPrefix(string current, string previous)
+int Dawg::getCommonPrefix(string current, string previous)
 {
     int i = 0;
     while (i < previous.length() && previous[i] == current[i])
@@ -219,8 +219,8 @@ int Trie::getCommonPrefix(string current, string previous)
     return i;
 }
 
-// Checks if a given word exists in the trie.
-bool Trie::doesWordExist(string word)
+// Checks if a given word exists in the dawg.
+bool Dawg::doesWordExist(string word)
 {
     Node *lastNode = rootNode->hasWord(word);
     if (lastNode && lastNode->terminal == true)
@@ -233,8 +233,8 @@ bool Trie::doesWordExist(string word)
     }
 }
 
-// Calculates how many nodes and branches are in the trie.
-void Trie::calculateCounts()
+// Calculates how many nodes and branches are in the dawg.
+void Dawg::calculateCounts()
 {
     if (nodeCount == 0)
     {
@@ -250,8 +250,8 @@ void Trie::calculateCounts()
     }
 }
 
-// Gets every possible word in the trie.
-vector<string> Trie::getLexicon()
+// Gets every possible word in the dawg.
+vector<string> Dawg::getLexicon()
 {
     vector<string> words = vector<string>();
     string word = "";
@@ -259,7 +259,7 @@ vector<string> Trie::getLexicon()
     return words;
 }
 
-Trie::Trie()
+Dawg::Dawg()
 {
     rootNode = new Node(false, latestId);
     latestId++;
@@ -275,9 +275,9 @@ Trie::Trie()
 
     ifstream file;
     file.open(argv[1], ios_base::in);
-    Trie trie = Trie();
+    Dawg dawg = Dawg();
     cout << "Adding Lexicon." << endl;
-    trie.addLexicon(file);
+    dawg.addLexicon(file);
     cout << "Lexicon Added." << endl;
 
     char c = 0;
@@ -292,7 +292,7 @@ Trie::Trie()
             vector<string> words;
             ofstream output_file("./results.txt");
             cout << "Writing lexicon to file..." << endl;
-            words = trie.getLexicon();
+            words = dawg.getLexicon();
             ostream_iterator<string> output_iterator(output_file, "\n");
             copy(words.begin(), words.end(), output_iterator);
             cout << "Wrote lexicon to file." << endl;
@@ -304,7 +304,7 @@ Trie::Trie()
             string input;
             cin >> input;
             cout << "Checking if " << input << " exists" << endl;
-            cout << trie.doesWordExist(input) << endl;
+            cout << dawg.doesWordExist(input) << endl;
             break;
         }
         case 'c':
@@ -315,11 +315,11 @@ Trie::Trie()
             Node *one;
             if (input == "*")
             {
-                one = trie.rootNode;
+                one = dawg.rootNode;
             }
             else
             {
-                one = trie.rootNode->hasWord(input);
+                one = dawg.rootNode->hasWord(input);
             }
             if (one != NULL)
             {
@@ -328,15 +328,15 @@ Trie::Trie()
             }
             else
             {
-                cout << "Does not exist in trie." << endl;
+                cout << "Does not exist in dawg." << endl;
             }
             break;
         }
         case 'd':
         {
-            trie.calculateCounts();
-            cout << "Branch count:" << trie.branchCount << endl;
-            cout << "Node count:" << trie.nodeCount << endl;
+            dawg.calculateCounts();
+            cout << "Branch count:" << dawg.branchCount << endl;
+            cout << "Node count:" << dawg.nodeCount << endl;
             break;
         }
         case 'e':
@@ -345,7 +345,7 @@ Trie::Trie()
             string input;
             cin >> input;
             cout << "Checking frequency of " << input << endl;
-            cout << trie.getWordFrequency(input) << endl;
+            cout << dawg.getWordFrequency(input) << endl;
             break;
         }
         default:

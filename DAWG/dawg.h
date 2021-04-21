@@ -1,5 +1,5 @@
-#if !defined(TRIE_H)
-#define TRIE_H
+#if !defined(DAWG_H)
+#define DAWG_H
 
 #include <string>
 #include <vector>
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-class Trie
+class Dawg
 {
 
 public:
@@ -26,7 +26,7 @@ public:
     void addFrequencies(Node *n, Node *n2);
     int getWordFrequency(string word);
     int getTotal(Node *n);
-    Trie();
+    Dawg();
 
     Node *rootNode;
     int nodeCount;
@@ -40,4 +40,4 @@ protected:
     int latestId = 0;
 };
 
-#endif // TRIE_H
+#endif // DAWG_H

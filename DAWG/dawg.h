@@ -19,6 +19,7 @@ public:
     Node *traversePrefix(string prefix, int freq);
     void addSuffix(string word, int freq, Node *current);
     void minimise(Node *curr, int index, int prevFreq, int currFreq);
+    Node* findEquivNode(Node* child);
     void addNode(Node* child, int index, int prevFreq);
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
@@ -35,7 +36,7 @@ public:
 
 protected:
     map<int, Node *> finalNodes;
-    string lastWord;
+    string prevWord;
     vector<Node *> registered;
     int latestId = 0;
 };

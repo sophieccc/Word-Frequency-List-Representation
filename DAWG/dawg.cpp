@@ -27,18 +27,18 @@ void Dawg::addLexicon(ifstream &file)
 // Adds the current word to the dawg and minimises 
 // the non-shared suffix of the previous word. 
 // For an explanation of the process please see the write-up.
-void Dawg::processWord(string word, int prevFreq, int currFreq)
+void Dawg::processWord(string currWord, int prevFreq, int currFreq)
 {
-    int lastIndex = getCommonPrefix(word, lastWord);
-    string prefix = word.substr(0, lastIndex);
-    string suffix = word.substr(lastIndex);
-    Node *lastPrefixState = traversePrefix(prefix, currFreq);
-    if (lastPrefixState != NULL && lastPrefixState->branches.size() != 0)
+    int prefixPos = getCommonPrefix(currWord, prevWord);
+    string prefix = currWord.substr(0, prefixPos);
+    string suffix = currWord.substr(prefixPos);
+    Node *lastPrefixNode = traversePrefix(prefix, currFreq);
+    if (lastPrefixNode != NULL && lastPrefixNode->branches.size() != 0)
     {
-        minimise(lastPrefixState, lastIndex, prevFreq, currFreq);
+        minimise(lastPrefixNode, prefixPos, prevFreq, currFreq);
     }
-    addSuffix(suffix, currFreq, lastPrefixState);
-    lastWord = word;
+    addSuffix(suffix, currFreq, lastPrefixNode);
+    prevWord = currWord;
 }
 
 // Adds the current word's frequency to each traversed branch.
@@ -60,7 +60,7 @@ Node *Dawg::traversePrefix(string prefix, int freq)
 // Makes it so node-sharing occures for suffixes -- what makes the dawg a DAWG.
 void Dawg::minimise(Node *curr, int index, int prevFreq, int currFreq)
 {
-    Node *child = curr->hasLetter(lastWord[index]);
+    Node *child = curr->hasLetter(prevWord[index]);
     if (child != NULL && child->registered != true)
     {
         if (child->branches.size() != 0)
@@ -69,31 +69,38 @@ void Dawg::minimise(Node *curr, int index, int prevFreq, int currFreq)
         }
         // Gets all nodes in the minimised set that could be equivalent
         // to the current child node, i.e. have the same hash.
-        auto res = minSet.equal_range(child);
-        if (res.first == minSet.end())
+        Node* equivNode = findEquivNode(child);
+        if(equivNode == NULL)
         {
             addNode(child, index, prevFreq);
         }
-        else
+        else 
         {
-            bool found = false;
-            for (auto it = res.first; it != res.second && !found; ++it)
+            addFrequencies(equivNode,child);
+            curr->branches.find(prevWord[index])->second = equivNode;
+            delete child;
+        }
+    }
+}
+
+Node* Dawg::findEquivNode(Node* child)
+{
+    Node* equivNode = NULL;
+    auto res = minSet.equal_range(child);
+    if (res.first != minSet.end())
+    {
+        bool found = false;
+        for (auto it = res.first; it != res.second && !found; ++it)
+        {
+            Node *n = *it;
+            if (checkEquivalence(n, child) == true)
             {
-                Node *n = *it;
-                if (checkEquivalence(n, child) == true)
-                {
-                    found = true;
-                    addFrequencies(n,child);
-                    curr->branches.find(lastWord[index])->second = n;
-                    delete child;
-                }
-            }
-            if(!found)
-            {
-                addNode(child, index, prevFreq);
+                found = true;
+                equivNode = n;
             }
         }
     }
+    return equivNode;
 }
 
 void Dawg::addNode(Node* child, int index, int prevFreq)
@@ -101,6 +108,7 @@ void Dawg::addNode(Node* child, int index, int prevFreq)
     child->registered = true;
     minSet.insert(child);
 }
+
 // Adds frequencies to all suffix nodes when shared. 
 void Dawg::addFrequencies(Node *n, /* int freq */ Node *n2)
 {
@@ -263,14 +271,14 @@ Dawg::Dawg()
 {
     rootNode = new Node(false, latestId);
     latestId++;
-    lastWord = "";
+    prevWord = "";
     minSet.insert(rootNode);
     rootNode->registered = true;
     nodeCount = 0;
     branchCount = 0;
 }
 
-/* int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 
     ifstream file;
@@ -355,4 +363,4 @@ Dawg::Dawg()
         }
         }
     } while (!exit);
-} */
+}

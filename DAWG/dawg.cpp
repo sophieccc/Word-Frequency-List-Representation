@@ -67,12 +67,11 @@ void Dawg::minimise(Node *curr, int index, int prevFreq, int currFreq)
         {
             minimise(child, index + 1, prevFreq, currFreq);
         }
-        // Gets all nodes in the minimised set that could be equivalent
-        // to the current child node, i.e. have the same hash.
         Node* equivNode = findEquivNode(child);
         if(equivNode == NULL)
         {
-            addNode(child, index, prevFreq);
+            child->registered = true;
+            minSet.insert(child);
         }
         else 
         {
@@ -83,6 +82,9 @@ void Dawg::minimise(Node *curr, int index, int prevFreq, int currFreq)
     }
 }
 
+// Gets all nodes in the minimised set that could be equivalent
+// to the current child node, i.e. have the same hash. 
+// and checks if there is a duplicate.
 Node* Dawg::findEquivNode(Node* child)
 {
     Node* equivNode = NULL;
@@ -101,12 +103,6 @@ Node* Dawg::findEquivNode(Node* child)
         }
     }
     return equivNode;
-}
-
-void Dawg::addNode(Node* child, int index, int prevFreq)
-{
-    child->registered = true;
-    minSet.insert(child);
 }
 
 // Adds frequencies to all suffix nodes when shared. 
@@ -278,7 +274,7 @@ Dawg::Dawg()
     branchCount = 0;
 }
 
-int main(int argc, char *argv[])
+/* int main(int argc, char *argv[])
 {
 
     ifstream file;
@@ -363,4 +359,4 @@ int main(int argc, char *argv[])
         }
         }
     } while (!exit);
-}
+} */

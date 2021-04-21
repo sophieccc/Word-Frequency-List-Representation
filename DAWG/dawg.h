@@ -20,7 +20,6 @@ public:
     void addSuffix(string word, int freq, Node *current);
     void minimise(Node *curr, int index, int prevFreq, int currFreq);
     Node* findEquivNode(Node* child);
-    void addNode(Node* child, int index, int prevFreq);
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();

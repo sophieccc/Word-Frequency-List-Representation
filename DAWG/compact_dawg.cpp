@@ -414,15 +414,15 @@ int CompactDawg::getIntegerMode(int maxNumber)
 {
     if (maxNumber < 256)
     {
-        return 2;
+        return 1;
     }
     else if (maxNumber < 32768)
     {
-        return 1;
+        return 5;
     }
     else if (maxNumber < 65536)
     {
-        return 3;
+        return 2;
     }
     else if (maxNumber < 4194304)
     {
@@ -434,11 +434,11 @@ int CompactDawg::getIntegerMode(int maxNumber)
     }
     else if (maxNumber < 16777216)
     {
-        return 4;
+        return 3;
     }
     else
     {
-        return 5;
+        return 4;
     }
 }
 
@@ -457,7 +457,7 @@ void CompactDawg::writeInteger(unsigned int index, ofstream *outfile, int mode, 
     {
         anyByteWrite(index, outfile);
     }
-    else if (mode == 1)
+    else if (mode == 5)
     {
         oneOrTwoBytesWrite(index, outfile);
     }
@@ -465,7 +465,7 @@ void CompactDawg::writeInteger(unsigned int index, ofstream *outfile, int mode, 
     {
         twoOrThreeBytesWrite(index, outfile);
     }
-    else if (mode == 5)
+    else if (mode == 4)
     {
         outfile->write((char *)(&index), sizeof(int));
     }
@@ -473,11 +473,11 @@ void CompactDawg::writeInteger(unsigned int index, ofstream *outfile, int mode, 
     {
         unsigned char firstChar = index % 256;
         outfile->write((char *)(&firstChar), sizeof(firstChar));
-        if (mode >= 3)
+        if (mode >= 2)
         {
             unsigned char secondChar = index / 256;
             outfile->write((char *)(&secondChar), sizeof(secondChar));
-            if (mode == 4)
+            if (mode == 3)
             {
                 unsigned char thirdChar = index / (256 * 256);
                 outfile->write((char *)(&thirdChar), sizeof(thirdChar));
@@ -603,7 +603,7 @@ void CompactDawg::readArrays(int listSize, int queueMode, int freqMode, ifstream
     }
     int i = 0;
     int index = 0;
-    if (queueMode == 5)
+    if (queueMode == 4)
     {
         while (infile->read((char *)(&index), sizeof(int)))
         {
@@ -643,7 +643,7 @@ pair<pair<char, int>, bool> CompactDawg::constructBranch(
         terminality->push_back(false);
     }
     unsigned int frequency;
-    if (freqMode == 5)
+    if (freqMode == 4)
     {
         infile->read((char *)(&frequency), sizeof(int));
     }
@@ -663,7 +663,7 @@ int CompactDawg::getIntegerVal(ifstream *infile, unsigned char firstChar, int mo
     {
         index = anyByteRead(infile, firstChar);
     }
-    else if (mode == 1)
+    else if (mode == 5)
     {
         index = oneOrTwoBytesRead(infile, firstChar);
     }
@@ -675,10 +675,10 @@ int CompactDawg::getIntegerVal(ifstream *infile, unsigned char firstChar, int mo
     {
         unsigned char secondChar = 0;
         unsigned char thirdChar = 0;
-        if (mode >= 3)
+        if (mode >= 2)
         {
             infile->read((char *)(&secondChar), sizeof(secondChar));
-            if (mode == 4)
+            if (mode == 3)
             {
                 infile->read((char *)(&thirdChar), sizeof(thirdChar));
             }

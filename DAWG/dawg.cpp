@@ -75,7 +75,7 @@ void Dawg::minimise(Node *curr, int index, int prevFreq, int currFreq)
         }
         else 
         {
-            addFrequencies(equivNode,child);
+            transferFrequencies(equivNode, child);
             curr->branches.find(prevWord[index])->second = equivNode;
             delete child;
         }
@@ -106,7 +106,7 @@ Node* Dawg::findEquivNode(Node* child)
 }
 
 // Adds frequencies to all suffix nodes when shared. 
-void Dawg::addFrequencies(Node *n, /* int freq */ Node *n2)
+void Dawg::transferFrequencies(Node *n, Node *n2)
 {
     for (auto it = n->branches.begin(), it2 = n2->branches.begin(); it != n->branches.end(); ++it, ++it2)
     {

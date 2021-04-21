@@ -99,14 +99,13 @@ void CompactDawg::createCode()
     for (int i = 1; i <= 256; i += 64)
     {
         int index = i;
-        for (auto it = alphabet.begin(); it != alphabet.end(); ++it)
+        for (auto it = alphabet.begin(); it != alphabet.end(); ++it, index++)
         {
             numToChar[index] = *it;
             if (i == 1)
             {
                 charToNum[*it] = index;
             }
-            index++;
         }
     }
 }

@@ -23,7 +23,7 @@ public:
     bool checkEquivalence(Node *one, Node *two);
     bool doesWordExist(string word);
     void calculateCounts();
-    void addFrequencies(Node *n, Node *n2);
+    void transferFrequencies(Node *n, Node *n2);
     int getWordFrequency(string word);
     int getTotal(Node *n);
     Dawg();

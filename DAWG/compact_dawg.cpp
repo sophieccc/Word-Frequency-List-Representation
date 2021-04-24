@@ -401,7 +401,7 @@ void CompactDawg::setMinLogBase(int maxFreq)
     float maxLog = log(maxFreq) / log(logBase);
     float difference = (5.0 / (float)multiplier);
     float limit = ((float)multiplier / divisor - difference) / 10;
-    while (maxLog >= limit && logBase < 20)
+    while (maxLog >= limit)
     {
         logBase++;
         maxLog = log(maxFreq) / log(logBase);

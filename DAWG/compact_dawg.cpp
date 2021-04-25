@@ -531,8 +531,7 @@ void CompactDawg::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
     {
         curr = ((index % 128) + 128);
         outfile->write((char *)(&curr), sizeof(curr));
-        index /= 128;
-        curr = index;
+        curr = index / 128;
         outfile->write((char *)(&curr), sizeof(curr));
     }
 }
@@ -541,24 +540,24 @@ void CompactDawg::oneOrTwoBytesWrite(unsigned int index, ofstream *outfile)
 // contains a flag.
 void CompactDawg::twoOrThreeBytesWrite(unsigned int index, ofstream *outfile)
 {
-    unsigned char firstChar = ((index % 256) + 256);
+    unsigned char firstChar = index % 256;
     outfile->write((char *)(&firstChar), sizeof(firstChar));
-    index /= 256;
+    int dividedInd = index/256;
     unsigned char secondChar;
-    if (index < 128)
+    if (dividedInd < 128)
     {
-        secondChar = index;
+        secondChar = dividedInd;
         outfile->write((char *)(&secondChar), sizeof(secondChar));
     }
     else
     {
-        secondChar = (index % 256) + 256;
+        secondChar = dividedInd % 256;
         if (secondChar < 128)
         {
             secondChar += 128;
         }
         outfile->write((char *)(&secondChar), sizeof(secondChar));
-        unsigned char thirdChar = index / 128;
+        unsigned char thirdChar = dividedInd / 128;
         outfile->write((char *)(&thirdChar), sizeof(thirdChar));
     }
 }
@@ -751,24 +750,24 @@ int CompactDawg::oneOrTwoBytesRead(ifstream *infile, unsigned char curr)
 }
 
 // Reads either two or three bytes, meaning only the second byte contains a flag.
-int CompactDawg::twoOrThreeBytesRead(ifstream *infile, unsigned char curr)
+int CompactDawg::twoOrThreeBytesRead(ifstream *infile, unsigned char firstByte)
 {
-    int index = curr;
+    int total = firstByte;
     unsigned char secondChar;
-    unsigned char thirdChar;
-    int remainingBits = (int)pow(2, 15);
     infile->read((char *)(&secondChar), sizeof(secondChar));
     if (secondChar > 127)
     {
-        index += ((secondChar - 128) * 256);
+        total += ((secondChar - 128) * 256);
+        unsigned char thirdChar;
         infile->read((char *)(&thirdChar), sizeof(thirdChar));
-        index += (thirdChar * remainingBits);
+        int remainingBits = (int)pow(2, 15);
+        total += (thirdChar * remainingBits);
     }
     else
     {
-        index += (secondChar * 256);
+        total += (secondChar * 256);
     }
-    return index;
+    return total;
 }
 
 int main(int argc, char *argv[])

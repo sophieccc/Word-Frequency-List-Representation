@@ -46,8 +46,8 @@ def main():
         ts = tinv(0.05, len(df['Original'])-2)
         print("slope (95%): {} +/- {}".format(res.slope,ts*res.stderr))
 
-        # plt.plot(df['Original'], df[column], 'o', label='original data')
-        # plt.plot(df['Original'], res.intercept + res.slope*df['Original'], 'r', label='fitted line')
+        # plt.plot(df['Original'], df[column], 'o', label='modified data')
+        # plt.plot(df['Original'], res.intercept + res.slope*df['Original'], 'r', label='original data')
         # plt.legend()
         # plt.show()
 

@@ -22,7 +22,7 @@ def average_percent_difference(column1, column2):
 
 
 def main():
-    df = pd.read_csv("Data/curr.csv")
+    df = pd.read_csv("Data/probaOrig.csv")
     columns = ['Log with 4 places', 'Log with 3 places', 'Log with 2 places']
     print(df[[
         'Original', 'Log with 4 places', 'Log with 3 places',
@@ -61,7 +61,7 @@ def main():
             print('Different distribution (reject H0)')
 
         # The p-value is the probability that a given result would occur under the null hypothesis.
-        # If the p valie is 0.05 or lower, we reject the null hypothesis.
+        # If the p value is 0.05 or lower, we reject the null hypothesis.
         # This means they do not have the same distribution.
         # AKA if p is smaller, we reject H0 (aka there is diff).
         # If p is bigger, we don't reject H0 (aka there is no diff).

@@ -9,4 +9,4 @@ de_full.txt
 .vscode/launch.json
 DAWG/output
 DAWG/.vscode/settings.json
-*.csv
+Dawg/*.csv

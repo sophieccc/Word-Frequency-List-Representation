@@ -1,0 +1,10 @@
+a 10000
+a's 23
+aa 1831
+aaa 586
+aaaa 125
+aaaaa 72
+aaaaaa 29
+aaaaaaaa 14
+aaaaaaaaa 11
+aaaaaaaaaaa 11

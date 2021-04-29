@@ -1,0 +1,17 @@
+Tests/small/hello_1.txt words=4 longest_word=5 max_freq=20 alphabet=8
+Tests/small/hello_2.txt words=8 longest_word=13 max_freq=308 alphabet=16
+Tests/small/non_ascii.txt words=5 longest_word=7 max_freq=2 alphabet=14
+Tests/small/d-rather.txt words=13 longest_word=28 max_freq=4 alphabet=24
+Tests/small/aaa_1.txt words=10 longest_word=20 max_freq=10000 alphabet=3
+Tests/small/aaa_2.txt words=10 longest_word=11 max_freq=10000 alphabet=3
+Tests/small/aaa_3.txt words=10 longest_word=11 max_freq=1000 alphabet=3
+Tests/medium/cleaned.txt words=562406 longest_word=119 max_freq=28787591 alphabet=26
+Tests/medium/en_alpha.txt words=198637 longest_word=34 max_freq=28787591 alphabet=26
+Tests/medium/en.txt words=198803 longest_word=34 max_freq=28787591 alphabet=31
+subset_100.txt words=100 longest_word=23 max_freq=2482 alphabet=26
+subset_1k.txt words=1000 longest_word=18 max_freq=90868 alphabet=26
+subset_10k.txt words=10000 longest_word=28 max_freq=7337058 alphabet=26
+subset_100k.txt words=100000 longest_word=38 max_freq=10572938 alphabet=26
+Tests/alpha/orig.txt words=198803 longest_word=34 max_freq=1 alphabet=31
+Tests/alpha/no_n.txt words=198803 longest_word=34 max_freq=1 alphabet=30
+Tests/alpha/no_ni.txt words=198803 longest_word=34 max_freq=1 alphabet=29

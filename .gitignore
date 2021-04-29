@@ -1,12 +1,6 @@
-Trie
 .DS_Store
-cs_full.txt
-en_full.txt
-de_full.txt
 .vscode/settings.json
-*.txt
 .vscode/tasks.json
 .vscode/launch.json
 DAWG/output
 DAWG/.vscode/settings.json
-Dawg/*.csv

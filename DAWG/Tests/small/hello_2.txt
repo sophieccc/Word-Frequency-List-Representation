@@ -1,0 +1,8 @@
+colano 30
+damo 124
+generalissimo 308
+hello 5
+hi 10
+my 20
+zip 3
+zollo 1

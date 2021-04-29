@@ -1,0 +1,10 @@
+a 1000
+a's 2
+aa 183
+aaa 58
+aaaa 12
+aaaaa 7
+aaaaaa 2
+aaaaaaaa 1
+aaaaaaaaa 1
+aaaaaaaaaaa 1
